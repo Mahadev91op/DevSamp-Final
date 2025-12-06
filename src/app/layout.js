@@ -1,20 +1,29 @@
-// src/app/layout.js
-import { Inter } from "next/font/google";
+import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar"; // <-- Import kiya
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import CustomCursor from "@/components/CustomCursor";
+import Noise from "@/components/Noise";
+import ScrollToTop from "@/components/ScrollToTop"; // <-- Import kiya
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata = {
-  title: "Modern Web Agency",
-  description: "Best Web Development Agency",
+  title: "DevSamp | Modern Web Agency",
+  description: "Transforming ideas into digital reality.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} bg-black text-white`}> {/* Black background set kiya */}
-        <Navbar />  {/* <-- Yahan Navbar lagaya */}
+    <html lang="en" className="scroll-smooth">
+      <body className={`${inter.variable} ${outfit.variable} bg-black text-white antialiased`}>
+        
+        <CustomCursor />
+        <Noise />
+        <ScrollToTop /> {/* <-- Yahan Add kar diya (Sabse upar ya niche kahi bhi rakh sakte hain) */}
+        
+        <Navbar />
         {children}
       </body>
     </html>

@@ -5,18 +5,19 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
+// ✅ UPDATED LINKS LIST
 const navLinks = [
   { name: "Services", href: "#services" },
-  { name: "Portfolio", href: "#work" },
+  { name: "Process", href: "#process" }, // New
+  { name: "Work", href: "#work" },
+  { name: "Pricing", href: "#pricing" }, // New
   { name: "About", href: "#about" },
-  { name: "Contact", href: "#contact" },
 ];
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // Scroll detect karke background dark karne ka logic
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
@@ -27,27 +28,15 @@ const Navbar = () => {
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
-  // Optimized Mobile Menu Animation (No Lag)
+  // Animation Variants
   const menuVariants = {
-    closed: {
-      opacity: 0,
-      x: "100%", // Screen ke bahar right side
-      transition: { duration: 0.4, ease: "easeInOut" }
-    },
-    open: {
-      opacity: 1,
-      x: 0, // Screen par wapas
-      transition: { duration: 0.4, ease: "easeInOut" }
-    }
+    closed: { x: "100%", transition: { duration: 0.4, ease: "easeInOut" } },
+    open: { x: 0, transition: { duration: 0.4, ease: "easeInOut" } }
   };
 
   const linkVariants = {
     closed: { opacity: 0, y: 20 },
-    open: (i) => ({
-      opacity: 1,
-      y: 0,
-      transition: { delay: 0.1 + i * 0.1, duration: 0.4 }
-    })
+    open: (i) => ({ opacity: 1, y: 0, transition: { delay: 0.1 + i * 0.1, duration: 0.4 } })
   };
 
   return (
@@ -60,14 +49,14 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
         
-        {/* LOGO - DevSamp */}
-        <Link href="/" className="z-50 relative">
+        {/* LOGO */}
+        <Link href="/" className="z-50 relative group">
             <motion.div 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 className="text-2xl font-bold tracking-tighter text-white"
             >
-              DEV<span className="text-blue-500">SAMP</span>
+              DEV<span className="text-blue-500 group-hover:text-purple-500 transition-colors">SAMP</span>
             </motion.div>
         </Link>
 
@@ -84,23 +73,25 @@ const Navbar = () => {
             </Link>
           ))}
           
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-gradient-to-r from-blue-600 to-violet-600 text-white px-6 py-2.5 rounded-full font-semibold text-sm shadow-lg hover:shadow-blue-500/25 transition-all"
-          >
-            Start Project
-          </motion.button>
+          <Link href="#contact">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-full font-semibold text-sm shadow-lg hover:shadow-blue-500/25 transition-all"
+            >
+              Let's Talk
+            </motion.button>
+          </Link>
         </div>
 
-        {/* Mobile Toggle Button */}
+        {/* Mobile Toggle */}
         <div className="md:hidden z-50">
           <button onClick={toggleMenu} className="text-white focus:outline-none p-2">
             {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
 
-        {/* Full Screen Mobile Menu Overlay */}
+        {/* Mobile Menu Overlay */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -129,15 +120,11 @@ const Navbar = () => {
                 </motion.div>
               ))}
               
-              <motion.button
-                variants={linkVariants}
-                custom={5}
-                initial="closed"
-                animate="open"
-                className="mt-8 px-8 py-3 border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition-colors"
-              >
-                Let's Talk
-              </motion.button>
+              <motion.div variants={linkVariants} custom={6} initial="closed" animate="open">
+                <Link href="#contact" onClick={toggleMenu} className="px-8 py-3 border border-white/20 rounded-full text-white text-xl">
+                  Contact Us
+                </Link>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
