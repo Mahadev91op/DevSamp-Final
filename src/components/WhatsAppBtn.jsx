@@ -13,7 +13,7 @@ const WhatsAppBtn = () => {
 
   return (
     <motion.a
-      href="https://wa.me/919876543210" // Apna number yahan dalein
+      href="https://wa.me/919330680642" // Apna number yahan dalein
       target="_blank"
       rel="noopener noreferrer"
       initial={{ opacity: 0, scale: 0 }}

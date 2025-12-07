@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation"; // 1. Hook Import kiya
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
@@ -15,10 +15,11 @@ const navLinks = [
 ];
 
 const Navbar = () => {
-  const pathname = usePathname(); // 2. Current Path pata kiya
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
+  // Scroll detection logic
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
@@ -27,14 +28,24 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 3. Admin Check: Agar '/admin' par hain to Navbar mat dikhao
+  // --- FIX 1: Scroll Lock ---
+  // Jab menu khulega, body scroll band ho jayega
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+  }, [isOpen]);
+
+  // Admin Panel Check
   if (pathname && pathname.startsWith("/admin")) {
     return null;
   }
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
-  // Animation Variants
+  // Animations
   const menuVariants = {
     closed: { x: "100%", transition: { duration: 0.4, ease: "easeInOut" } },
     open: { x: 0, transition: { duration: 0.4, ease: "easeInOut" } }
@@ -47,10 +58,15 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed w-full z-50 top-0 start-0 transition-all duration-300 ${
-        scrolled
-          ? "bg-black/80 backdrop-blur-md border-b border-white/10 py-3"
-          : "bg-transparent py-5"
+      // --- FIX 2 & 3: Z-Index and Stable State ---
+      // z-[1000] ensure karega ye sabse upar rahe.
+      // isOpen hone par hum 'bg-black py-5' force kar rahe hain taaki menu khulne par navbar hile nahi.
+      className={`fixed w-full z-[1000] top-0 start-0 transition-all duration-300 ${
+        isOpen 
+          ? "bg-black py-5 border-b border-white/10" // Jab Menu khula ho (Stable look)
+          : scrolled
+            ? "bg-black/80 backdrop-blur-md border-b border-white/10 py-3" // Scroll karne par (Compact look)
+            : "bg-transparent py-5" // Top par (Transparent look)
       }`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6">
@@ -66,7 +82,7 @@ const Navbar = () => {
             </motion.div>
         </Link>
 
-        {/* Desktop Menu */}
+        {/* Desktop Menu (Hidden on Mobile) */}
         <div className="hidden md:flex items-center space-x-8">
           {navLinks.map((link, index) => (
             <Link 
@@ -90,7 +106,7 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Mobile Toggle */}
+        {/* Mobile Toggle Button */}
         <div className="md:hidden z-50">
           <button onClick={toggleMenu} className="text-white focus:outline-none p-2">
             {isOpen ? <X size={28} /> : <Menu size={28} />}
