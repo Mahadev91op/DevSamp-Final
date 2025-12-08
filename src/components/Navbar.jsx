@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, User, LayoutDashboard, Settings, LogOut, ChevronDown } from "lucide-react";
+import { Menu, X, User, LayoutDashboard, LogOut, ChevronDown } from "lucide-react";
 
 // Nav Links (Original)
 const navLinks = [
@@ -149,9 +149,7 @@ const Navbar = () => {
                                 <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
                                     <LayoutDashboard size={16} className="text-blue-500"/> Dashboard
                                 </Link>
-                                <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
-                                    <Settings size={16} className="text-purple-500"/> Edit Profile
-                                </Link>
+                                {/* Edit Profile Removed */}
                                 <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-colors mt-1">
                                     <LogOut size={16}/> Logout
                                 </button>
@@ -180,7 +178,7 @@ const Navbar = () => {
           </button>
         </div>
 
-        {/* Mobile Menu Overlay */}
+        {/* Mobile Menu Overlay - FIXED LAYOUT */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -188,7 +186,8 @@ const Navbar = () => {
               initial="closed"
               animate="open"
               exit="closed"
-              className="fixed inset-0 bg-black z-40 flex flex-col items-center justify-center space-y-8"
+              // Fix: Added overflow-y-auto, justify-start, pt-32, pb-10
+              className="fixed inset-0 bg-black z-40 flex flex-col items-center justify-start pt-32 pb-10 space-y-6 overflow-y-auto h-screen"
             >
               {navLinks.map((link, index) => (
                 <motion.div
@@ -198,11 +197,12 @@ const Navbar = () => {
                   initial="closed"
                   animate="open"
                   exit="closed"
+                  className="shrink-0" // Fix: Prevent shrinking
                 >
                     <Link 
                         href={link.href} 
                         onClick={toggleMenu}
-                        className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 hover:to-blue-500 transition-all"
+                        className="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 hover:to-blue-500 transition-all block py-1"
                     >
                     {link.name}
                     </Link>
@@ -210,22 +210,26 @@ const Navbar = () => {
               ))}
               
               {/* MOBILE USER ACTIONS */}
-              <motion.div variants={linkVariants} custom={6} initial="closed" animate="open" className="flex flex-col items-center gap-4 mt-4 w-full px-10">
+              <motion.div 
+                variants={linkVariants} 
+                custom={6} 
+                initial="closed" 
+                animate="open" 
+                className="flex flex-col items-center gap-4 mt-4 w-full px-6 max-w-sm shrink-0" // Fix: Width and padding
+              >
                 {user ? (
-                    <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
+                    <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
                         <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-2xl mx-auto mb-3 shadow-lg">
                             {user.name.charAt(0).toUpperCase()}
                         </div>
                         <h3 className="text-xl font-bold text-white mb-1">{user.name}</h3>
-                        <p className="text-gray-500 text-sm mb-6">{user.email}</p>
+                        <p className="text-gray-500 text-sm mb-6 truncate">{user.email}</p>
                         
                         <div className="flex flex-col gap-3">
                             <Link href="/dashboard" onClick={toggleMenu} className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl flex items-center justify-center gap-2">
                                 <LayoutDashboard size={18}/> Dashboard
                             </Link>
-                            <Link href="/dashboard" onClick={toggleMenu} className="w-full py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl flex items-center justify-center gap-2">
-                                <Settings size={18}/> Edit Profile
-                            </Link>
+                            {/* Edit Profile Removed */}
                             <button onClick={handleLogout} className="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-xl flex items-center justify-center gap-2 border border-red-500/20">
                                 <LogOut size={18}/> Logout
                             </button>
