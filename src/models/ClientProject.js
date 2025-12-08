@@ -2,13 +2,22 @@ import mongoose from "mongoose";
 
 const ClientProjectSchema = new mongoose.Schema(
   {
-    clientEmail: { type: String, required: true }, // Link project to user by email
+    clientEmail: { type: String, required: true },
     title: { type: String, required: true },
-    status: { type: String, default: "Active" }, // Active, Completed, Pending
-    progress: { type: Number, default: 0 }, // 0 to 100
+    // Naye Advanced Fields
+    description: { type: String, default: "" }, // Project Brief
+    budget: { type: String, default: "TBD" }, // e.g. "$5000"
+    paymentStatus: { type: String, default: "Pending" }, // Paid, Partial, Pending
+    links: { 
+        type: [{ title: String, url: String }], 
+        default: [] 
+    }, // Useful links (Figma, Drive, Invoice)
+    
+    // Purane Fields
+    status: { type: String, default: "Active" },
+    progress: { type: Number, default: 0 },
     nextMilestone: { type: String, default: "Discovery" },
     dueDate: { type: String, default: "TBD" },
-    // Auto-generated Stages for simplicity in Admin
     stages: { 
         type: Array, 
         default: [
@@ -19,7 +28,6 @@ const ClientProjectSchema = new mongoose.Schema(
             { id: 5, title: "Deployment", status: "pending", date: "Pending" }
         ]
     },
-    // Recent Updates List
     updates: { type: Array, default: [] } 
   },
   { timestamps: true }

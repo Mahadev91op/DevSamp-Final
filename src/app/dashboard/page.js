@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { 
   LogOut, Home, FolderOpen, User, Settings, FileText, 
   CheckCircle2, Clock, AlertCircle, ChevronRight, 
-  ExternalLink, Download, CreditCard, Layout, Code2, Rocket, Loader2
+  ExternalLink, Download, CreditCard, Layout, Code2, Rocket, Loader2, DollarSign, Link as LinkIcon
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -51,7 +51,7 @@ export default function Dashboard() {
             <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 px-4">Main Menu</p>
             <NavItem icon={Home} label="Overview" id="overview" active={activeTab} set={setActiveTab} />
             <NavItem icon={FolderOpen} label="My Project" id="project" active={activeTab} set={setActiveTab} />
-            <NavItem icon={FileText} label="Billing & Invoices" id="billing" active={activeTab} set={setActiveTab} />
+            <NavItem icon={FileText} label="Resources" id="resources" active={activeTab} set={setActiveTab} />
             <NavItem icon={Settings} label="Settings" id="settings" active={activeTab} set={setActiveTab} />
         </div>
         <div className="p-6 border-t border-white/10">
@@ -68,7 +68,8 @@ export default function Dashboard() {
             <h1 className="text-3xl md:text-4xl font-bold mb-2">
                 {activeTab === 'overview' && `Welcome back, ${user.name.split(' ')[0]} 👋`}
                 {activeTab === 'project' && "Project Dashboard"}
-                {activeTab === 'billing' && "Billing & Invoices"}
+                {activeTab === 'resources' && "Project Assets"}
+                {activeTab === 'settings' && "Account Settings"}
             </h1>
             <p className="text-gray-400 text-sm md:text-base">Track progress, updates, and deliverables.</p>
         </header>
@@ -83,76 +84,122 @@ export default function Dashboard() {
                 </div>
             ) : (
                 <>
-                    {/* OVERVIEW TAB - Same Design, Real Data */}
+                    {/* OVERVIEW TAB - Enhanced with Payment & Info */}
                     {activeTab === 'overview' && (
                         <>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                 <StatCard label="Status" value={projectData.status} icon={<FolderOpen className="text-blue-500" size={24}/>} sub="Current State"/>
-                                <StatCard label="Next Milestone" value={projectData.nextMilestone} icon={<Code2 className="text-purple-500" size={24}/>} sub={`Progress: ${projectData.progress}%`}/>
-                                <StatCard label="Due Date" value={projectData.dueDate} icon={<Clock className="text-yellow-500" size={24}/>} sub="Estimated"/>
+                                <StatCard label="Payment" value={projectData.paymentStatus} icon={<DollarSign className={projectData.paymentStatus === 'Paid' ? "text-green-500" : "text-yellow-500"} size={24}/>} sub={projectData.budget || "TBD"}/>
+                                <StatCard label="Next Milestone" value={projectData.nextMilestone} icon={<Code2 className="text-purple-500" size={24}/>} sub={`${projectData.progress}% Done`}/>
+                                <StatCard label="Due Date" value={projectData.dueDate} icon={<Clock className="text-orange-500" size={24}/>} sub="Estimated"/>
                             </div>
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                <div className="bg-[#0a0a0a] border border-white/10 p-6 rounded-3xl">
+                            
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                {/* Project Details Card */}
+                                <div className="lg:col-span-2 bg-[#0a0a0a] border border-white/10 p-6 rounded-3xl">
                                     <div className="flex justify-between items-center mb-6"><h3 className="text-xl font-bold">Current Project</h3></div>
-                                    <div className="bg-white/5 rounded-2xl p-5 border border-white/5 mb-6">
+                                    
+                                    <div className="bg-white/5 rounded-2xl p-6 border border-white/5 mb-6">
                                         <div className="flex items-center gap-4 mb-4">
                                             <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg"><Layout size={24} /></div>
-                                            <div><h4 className="font-bold text-lg">{projectData.title}</h4><p className="text-xs text-gray-400">DevSamp Agency</p></div>
+                                            <div>
+                                                <h4 className="font-bold text-lg">{projectData.title}</h4>
+                                                <p className="text-xs text-gray-400">DevSamp Agency</p>
+                                            </div>
                                         </div>
+                                        
+                                        {/* Project Description (New) */}
+                                        {projectData.description && (
+                                            <div className="mb-6 text-sm text-gray-300 leading-relaxed bg-black/40 p-4 rounded-xl border border-white/5">
+                                                {projectData.description}
+                                            </div>
+                                        )}
+
                                         <div className="space-y-2">
-                                            <div className="flex justify-between text-xs font-bold text-gray-400"><span>Progress</span><span>{projectData.progress}%</span></div>
+                                            <div className="flex justify-between text-xs font-bold text-gray-400"><span>Overall Progress</span><span>{projectData.progress}%</span></div>
                                             <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" style={{ width: `${projectData.progress}%` }}></div></div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="bg-[#0a0a0a] border border-white/10 p-6 rounded-3xl flex flex-col">
-                                    <h3 className="text-xl font-bold mb-6">Recent Updates</h3>
-                                    <div className="space-y-6 overflow-y-auto max-h-[250px] custom-scrollbar pr-2">
-                                        {projectData.updates && projectData.updates.map((u, i) => (
-                                            <div key={i} className="flex gap-4">
-                                                <div className="flex flex-col items-center"><div className="w-3 h-3 rounded-full bg-blue-500"></div><div className="w-[1px] h-full bg-white/10 my-1"></div></div>
-                                                <div className="pb-2"><h4 className="text-sm font-bold text-white">{u.title}</h4><p className="text-xs text-gray-400 mt-1">{u.desc}</p><span className="text-[10px] text-gray-600">{u.date}</span></div>
-                                            </div>
-                                        ))}
-                                        {(!projectData.updates || projectData.updates.length === 0) && <p className="text-gray-500 text-sm">No updates yet.</p>}
+
+                                {/* Updates & Quick Actions */}
+                                <div className="space-y-6">
+                                    {/* Recent Updates */}
+                                    <div className="bg-[#0a0a0a] border border-white/10 p-6 rounded-3xl flex flex-col max-h-[400px]">
+                                        <h3 className="text-xl font-bold mb-6">Recent Updates</h3>
+                                        <div className="space-y-6 overflow-y-auto custom-scrollbar pr-2 flex-1">
+                                            {projectData.updates && projectData.updates.map((u, i) => (
+                                                <div key={i} className="flex gap-4">
+                                                    <div className="flex flex-col items-center"><div className="w-3 h-3 rounded-full bg-blue-500"></div><div className="w-[1px] h-full bg-white/10 my-1"></div></div>
+                                                    <div className="pb-2"><h4 className="text-sm font-bold text-white">{u.title}</h4><p className="text-xs text-gray-400 mt-1">{u.desc}</p><span className="text-[10px] text-gray-600">{u.date}</span></div>
+                                                </div>
+                                            ))}
+                                            {(!projectData.updates || projectData.updates.length === 0) && <p className="text-gray-500 text-sm">No updates yet.</p>}
+                                        </div>
                                     </div>
+
+                                    {/* Quick Resources (New) */}
+                                    {projectData.links && projectData.links.length > 0 && (
+                                        <div className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-white/10 p-6 rounded-3xl">
+                                            <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><LinkIcon className="text-purple-400" size={20}/> Quick Links</h3>
+                                            <div className="space-y-3">
+                                                {projectData.links.map((link, i) => (
+                                                    <a href={link.url} target="_blank" key={i} className="w-full flex items-center justify-between p-3 bg-black/40 hover:bg-blue-600/20 border border-white/10 rounded-xl transition-all group cursor-pointer text-sm font-bold text-gray-300 hover:text-white">
+                                                        {link.title} <ExternalLink size={14}/>
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </>
                     )}
 
-                    {/* PROJECT TAB - Same Design, Real Data */}
+                    {/* PROJECT TAB - Timeline */}
                     {activeTab === 'project' && (
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             <div className="lg:col-span-2 space-y-8">
                                 <div className="bg-[#0a0a0a] border border-white/10 p-8 rounded-3xl">
-                                    <h3 className="text-xl font-bold mb-8">Project Timeline</h3>
+                                    <h3 className="text-xl font-bold mb-8">Detailed Timeline</h3>
                                     <div className="space-y-0">
                                         {projectData.stages.map((stage, index) => (
                                             <div key={stage.id} className="flex group">
                                                 <div className="flex flex-col items-center mr-6">
-                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 z-10 transition-all ${projectData.progress >= (index + 1) * 20 ? 'bg-green-500 border-green-500 text-black' : 'bg-[#0a0a0a] border-white/20 text-gray-500'}`}>
-                                                        {projectData.progress >= (index + 1) * 20 ? <CheckCircle2 size={20}/> : <span className="text-sm font-bold">{index + 1}</span>}
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 z-10 transition-all ${stage.status === 'completed' || projectData.progress >= (index + 1) * 20 ? 'bg-green-500 border-green-500 text-black' : 'bg-[#0a0a0a] border-white/20 text-gray-500'}`}>
+                                                        {stage.status === 'completed' || projectData.progress >= (index + 1) * 20 ? <CheckCircle2 size={20}/> : <span className="text-sm font-bold">{index + 1}</span>}
                                                     </div>
-                                                    {index !== projectData.stages.length - 1 && <div className={`w-1 h-12 md:h-16 ${projectData.progress >= (index + 1) * 20 ? 'bg-green-500' : 'bg-white/10'}`}></div>}
+                                                    {index !== projectData.stages.length - 1 && <div className={`w-1 h-12 md:h-16 ${stage.status === 'completed' ? 'bg-green-500' : 'bg-white/10'}`}></div>}
                                                 </div>
                                                 <div className="pb-8 opacity-100">
-                                                    <h4 className={`text-lg font-bold ${projectData.progress >= (index + 1) * 20 ? 'text-green-400' : 'text-gray-400'}`}>{stage.title}</h4>
-                                                    <p className="text-sm text-gray-500 mt-1">{projectData.progress >= (index + 1) * 20 ? "Completed" : "Pending"}</p>
+                                                    <h4 className={`text-lg font-bold ${stage.status === 'completed' ? 'text-green-400' : 'text-gray-400'}`}>{stage.title}</h4>
+                                                    <p className="text-sm text-gray-500 mt-1">{stage.status === 'completed' ? "Completed" : "Pending/In Progress"}</p>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             </div>
-                            <div className="space-y-6">
-                                <div className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-white/10 p-6 rounded-3xl">
-                                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><Rocket className="text-purple-400" size={20}/> Quick Actions</h3>
-                                    <div className="space-y-3">
-                                        <button className="w-full flex items-center justify-between p-4 bg-black/40 hover:bg-blue-600 border border-white/10 rounded-xl transition-all group"><span className="text-sm font-bold">Contact Support</span><ExternalLink size={16}/></button>
-                                    </div>
+                        </div>
+                    )}
+
+                    {/* RESOURCES TAB (New dedicated tab if lists are long) */}
+                    {activeTab === 'resources' && (
+                        <div className="bg-[#0a0a0a] border border-white/10 p-8 rounded-3xl">
+                            <h3 className="text-xl font-bold mb-6">Project Assets & Documents</h3>
+                            {projectData.links && projectData.links.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                    {projectData.links.map((link, i) => (
+                                        <a href={link.url} target="_blank" key={i} className="flex flex-col p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all group">
+                                            <div className="p-3 bg-blue-600/20 text-blue-400 w-fit rounded-xl mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors"><LinkIcon size={24}/></div>
+                                            <h4 className="font-bold text-lg mb-1">{link.title}</h4>
+                                            <p className="text-xs text-gray-500 flex items-center gap-1">Open Resource <ExternalLink size={12}/></p>
+                                        </a>
+                                    ))}
                                 </div>
-                            </div>
+                            ) : (
+                                <p className="text-gray-500">No resources shared yet.</p>
+                            )}
                         </div>
                     )}
                 </>
