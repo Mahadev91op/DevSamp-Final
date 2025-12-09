@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, User, LayoutDashboard, LogOut, ChevronDown } from "lucide-react";
+import { Menu, X, LayoutDashboard, LogOut, ChevronDown, LogIn } from "lucide-react";
 
-// Nav Links (Original)
+// Nav Links
 const navLinks = [
   { name: "Services", href: "/#services" },
   { name: "Work", href: "/#work" },
@@ -21,23 +21,30 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState(null);
-  const [isProfileHovered, setIsProfileHovered] = useState(false); // Hover State
+  const [isProfileHovered, setIsProfileHovered] = useState(false);
 
-  // --- LOGIN CHECK LOGIC ---
+  // --- LOGIN CHECK LOGIC (FIXED) ---
   useEffect(() => {
     const checkUser = () => {
       const storedUser = localStorage.getItem("user");
-      if (storedUser) setUser(JSON.parse(storedUser));
-      else setUser(null);
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      } else {
+        setUser(null);
+      }
     };
+
+    // Initial check
     checkUser();
     
+    // Event listener for updates
     window.addEventListener("storage", checkUser);
     return () => window.removeEventListener("storage", checkUser);
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    // Force update for same tab
     window.dispatchEvent(new Event("storage"));
     setUser(null);
     router.push("/login");
@@ -112,7 +119,7 @@ const Navbar = () => {
             </Link>
           ))}
           
-          {/* USER PROFILE DROPDOWN (DESKTOP) */}
+          {/* USER PROFILE / LOGIN BUTTON */}
           {user ? (
              <div 
                 className="relative"
@@ -149,7 +156,6 @@ const Navbar = () => {
                                 <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
                                     <LayoutDashboard size={16} className="text-blue-500"/> Dashboard
                                 </Link>
-                                {/* Edit Profile Removed */}
                                 <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-colors mt-1">
                                     <LogOut size={16}/> Logout
                                 </button>
@@ -159,13 +165,13 @@ const Navbar = () => {
                 </AnimatePresence>
              </div>
           ) : (
-             <Link href="#contact">
+             <Link href="/login">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-full font-semibold text-sm shadow-lg hover:shadow-blue-500/25 transition-all"
+                  className="bg-white text-black px-6 py-2.5 rounded-full font-bold text-sm shadow-lg hover:bg-gray-200 transition-all flex items-center gap-2"
                 >
-                  Let's Talk
+                  Login <LogIn size={16} />
                 </motion.button>
              </Link>
           )}
@@ -178,7 +184,7 @@ const Navbar = () => {
           </button>
         </div>
 
-        {/* Mobile Menu Overlay - FIXED LAYOUT */}
+        {/* Mobile Menu Overlay */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -186,7 +192,6 @@ const Navbar = () => {
               initial="closed"
               animate="open"
               exit="closed"
-              // Fix: Added overflow-y-auto, justify-start, pt-32, pb-10
               className="fixed inset-0 bg-black z-40 flex flex-col items-center justify-start pt-32 pb-10 space-y-6 overflow-y-auto h-screen"
             >
               {navLinks.map((link, index) => (
@@ -197,7 +202,7 @@ const Navbar = () => {
                   initial="closed"
                   animate="open"
                   exit="closed"
-                  className="shrink-0" // Fix: Prevent shrinking
+                  className="shrink-0"
                 >
                     <Link 
                         href={link.href} 
@@ -215,7 +220,7 @@ const Navbar = () => {
                 custom={6} 
                 initial="closed" 
                 animate="open" 
-                className="flex flex-col items-center gap-4 mt-4 w-full px-6 max-w-sm shrink-0" // Fix: Width and padding
+                className="flex flex-col items-center gap-4 mt-4 w-full px-6 max-w-sm shrink-0"
               >
                 {user ? (
                     <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
@@ -229,15 +234,14 @@ const Navbar = () => {
                             <Link href="/dashboard" onClick={toggleMenu} className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl flex items-center justify-center gap-2">
                                 <LayoutDashboard size={18}/> Dashboard
                             </Link>
-                            {/* Edit Profile Removed */}
                             <button onClick={handleLogout} className="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-xl flex items-center justify-center gap-2 border border-red-500/20">
                                 <LogOut size={18}/> Logout
                             </button>
                         </div>
                     </div>
                 ) : (
-                    <Link href="#contact" onClick={toggleMenu} className="px-8 py-3 border border-white/20 rounded-full text-white text-xl w-full text-center hover:bg-white/10 transition-colors">
-                      Let's Talk
+                    <Link href="/login" onClick={toggleMenu} className="px-8 py-4 bg-white text-black font-bold rounded-full text-xl w-full text-center hover:bg-gray-200 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-white/10">
+                      Login <LogIn size={20} />
                     </Link>
                 )}
               </motion.div>
