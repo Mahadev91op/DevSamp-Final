@@ -6,7 +6,8 @@ import { motion } from "framer-motion";
 import { 
   LogOut, Home, FolderOpen, User, Settings, FileText, 
   CheckCircle2, Clock, AlertCircle, ChevronRight, 
-  ExternalLink, Download, CreditCard, Layout, Code2, Rocket, Loader2, DollarSign, Link as LinkIcon
+  ExternalLink, Download, CreditCard, Layout, Code2, Rocket, Loader2, DollarSign, Link as LinkIcon,
+  UploadCloud, File // <-- New Icons Imported
 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -17,6 +18,9 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview"); 
   const [projectData, setProjectData] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // --- New State for Upload ---
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -42,15 +46,64 @@ export default function Dashboard() {
     router.push("/login");
   };
 
-  // --- ADVANCED PDF GENERATION LOGIC ---
+  // --- New File Upload Function ---
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+        // 1. Cloudinary Upload
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const uploadRes = await fetch("/api/upload", {
+            method: "POST",
+            body: formData
+        });
+        const uploadData = await uploadRes.json();
+
+        if (!uploadRes.ok) throw new Error("Upload Failed");
+
+        // 2. Database Update
+        const newDoc = {
+            name: file.name,
+            url: uploadData.url,
+            uploadedBy: "Client",
+            date: new Date().toLocaleDateString()
+        };
+
+        const updatedDocs = [newDoc, ...(projectData.documents || [])];
+
+        const updateRes = await fetch("/api/client-projects", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                id: projectData._id, 
+                documents: updatedDocs 
+            })
+        });
+
+        if (updateRes.ok) {
+            setProjectData({ ...projectData, documents: updatedDocs });
+            alert("File Uploaded Successfully!");
+        }
+
+    } catch (error) {
+        console.error(error);
+        alert("Failed to upload file.");
+    }
+    setUploading(false);
+  };
+
+  // --- Invoice Logic (Same as before) ---
   const generateInvoice = () => {
     if (!projectData) return;
 
     const doc = new jsPDF();
-    const brandColor = [37, 99, 235]; // Blue-600 RGB
+    const brandColor = [37, 99, 235]; 
 
-    // --- 1. HEADER & BRANDING ---
-    // Left Side Logo & Name
+    // Header
     doc.setFontSize(24);
     doc.setTextColor(...brandColor);
     doc.setFont("helvetica", "bold");
@@ -61,30 +114,27 @@ export default function Dashboard() {
     doc.setFont("helvetica", "normal");
     doc.text("Digital Product Agency", 15, 26);
 
-    // Right Side: INVOICE Label
+    // Invoice Label
     doc.setFontSize(30);
-    doc.setTextColor(200, 200, 200); // Light Gray
+    doc.setTextColor(200, 200, 200);
     doc.setFont("helvetica", "bold");
     doc.text("INVOICE", 150, 25);
 
-    // Divider Line
+    // Divider
     doc.setDrawColor(200);
     doc.line(15, 35, 195, 35);
 
-    // --- 2. COMPANY & CLIENT INFO ---
+    // Info
     doc.setFontSize(10);
     doc.setTextColor(50);
 
-    // FROM (Company)
     doc.setFont("helvetica", "bold");
     doc.text("FROM:", 15, 45);
     doc.setFont("helvetica", "normal");
     doc.text("DevSamp Agency", 15, 50);
     doc.text("Kolkata, West Bengal, India", 15, 55);
     doc.text("Email: devsamp1st@gmail.com", 15, 60);
-    doc.text("Phone: +91 9330680642", 15, 65);
 
-    // TO (Client)
     doc.setFont("helvetica", "bold");
     doc.text("BILL TO:", 110, 45);
     doc.setFont("helvetica", "normal");
@@ -92,24 +142,10 @@ export default function Dashboard() {
     doc.text(user.email, 110, 55);
     doc.text(`Project: ${projectData.title}`, 110, 60);
 
-    // Invoice Meta Data
-    const invoiceNo = `INV-${Math.floor(1000 + Math.random() * 9000)}`;
-    const issueDate = new Date().toLocaleDateString();
-    const dueDate = projectData.dueDate || "Upon Receipt";
-
-    doc.setFillColor(245, 247, 250);
-    doc.roundedRect(15, 75, 180, 20, 2, 2, "F");
-    
-    doc.setFont("helvetica", "bold");
-    doc.text(`Invoice No: ${invoiceNo}`, 20, 85);
-    doc.text(`Issue Date: ${issueDate}`, 80, 85);
-    doc.text(`Due Date: ${dueDate}`, 140, 85);
-
-    // --- 3. ITEMS TABLE ---
-    const tableColumn = ["Description", "Milestone Phase", "Cost"];
+    // Table
+    const tableColumn = ["Description", "Phase", "Cost"];
     const tableRows = [
-        [projectData.title, "Discovery & Strategy", "Included"],
-        [projectData.description || "Web Development Services", projectData.nextMilestone, projectData.budget || "$0"]
+        [projectData.title, "Full Project", projectData.budget || "$0"]
     ];
 
     autoTable(doc, {
@@ -117,83 +153,10 @@ export default function Dashboard() {
         head: [tableColumn],
         body: tableRows,
         theme: 'grid',
-        headStyles: { 
-            fillColor: brandColor, 
-            textColor: [255, 255, 255], 
-            fontStyle: 'bold',
-            halign: 'left'
-        },
-        styles: { 
-            fontSize: 10, 
-            cellPadding: 6,
-            textColor: [50, 50, 50]
-        },
-        columnStyles: {
-            0: { cellWidth: 80 },
-            1: { cellWidth: 60 },
-            2: { cellWidth: 40, halign: 'right', fontStyle: 'bold' },
-        },
-        foot: [['', 'Total', projectData.budget || "$0"]],
-        footStyles: {
-            fillColor: [240, 240, 240],
-            textColor: brandColor,
-            fontStyle: 'bold',
-            halign: 'right'
-        }
+        headStyles: { fillColor: brandColor }
     });
 
-    // --- 4. PAYMENT STATUS & INFO ---
-    const finalY = doc.lastAutoTable.finalY + 15;
-    
-    // Payment Status Badge
-    const status = projectData.paymentStatus || "Pending";
-    if (status === "Paid") {
-        doc.setTextColor(34, 197, 94); // Green
-        doc.setFontSize(14);
-        doc.text("PAID IN FULL", 15, finalY + 5);
-    } else {
-        doc.setTextColor(239, 68, 68); // Red
-        doc.setFontSize(14);
-        doc.text("PAYMENT PENDING", 15, finalY + 5);
-    }
-
-    // Bank Details Box
-    doc.setDrawColor(220);
-    doc.setLineWidth(0.5);
-    doc.rect(15, finalY + 15, 90, 35);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(0);
-    doc.setFont("helvetica", "bold");
-    doc.text("Bank Transfer Details:", 20, finalY + 22);
-    
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(80);
-    doc.text("Bank: HDFC Bank", 20, finalY + 28);
-    doc.text("Account Name: DevSamp Agency", 20, finalY + 33);
-    doc.text("Account No: XXXXXXXXXX1234", 20, finalY + 38);
-    doc.text("IFSC Code: HDFC0001234", 20, finalY + 43);
-
-    // --- 5. TERMS & FOOTER ---
-    const pageHeight = doc.internal.pageSize.height;
-    
-    doc.setFontSize(8);
-    doc.setTextColor(150);
-    doc.text("Terms & Conditions:", 15, pageHeight - 30);
-    doc.text("1. Please pay within 7 days of receiving this invoice.", 15, pageHeight - 25);
-    doc.text("2. This is a computer-generated invoice and requires no signature.", 15, pageHeight - 21);
-
-    // Bottom Line
-    doc.setFillColor(...brandColor);
-    doc.rect(0, pageHeight - 10, 210, 10, "F");
-    
-    doc.setTextColor(255);
-    doc.text("www.devsamp.com", 15, pageHeight - 4);
-    doc.text("Thank you for your business!", 150, pageHeight - 4);
-
-    // Save
-    doc.save(`DevSamp_Invoice_${invoiceNo}.pdf`);
+    doc.save(`Invoice_${projectData.title}.pdf`);
   };
 
   if (!user) return null;
@@ -202,13 +165,17 @@ export default function Dashboard() {
     <div className="min-h-screen bg-black text-white flex pt-28">
       
       {/* SIDEBAR (Desktop) */}
-      <aside className="w-64 border-r border-white/10 hidden md:flex flex-col fixed left-0 top-28 bottom-0 bg-black z-10 overflow-y-auto">
+      <aside className="w-64 border-r border-white/10 hidden md:flex flex-col fixed left-0 top-28 bottom-0 bg-black z-10 overflow-y-auto custom-scrollbar">
         <div className="p-6 flex-1 space-y-2">
             <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 px-4">Main Menu</p>
             <NavItem icon={Home} label="Overview" id="overview" active={activeTab} set={setActiveTab} />
             <NavItem icon={FolderOpen} label="My Project" id="project" active={activeTab} set={setActiveTab} />
+            
+            {/* New Documents Tab */}
+            <NavItem icon={FileText} label="Documents" id="documents" active={activeTab} set={setActiveTab} />
+            
             <NavItem icon={CreditCard} label="Billing" id="billing" active={activeTab} set={setActiveTab} />
-            <NavItem icon={FileText} label="Resources" id="resources" active={activeTab} set={setActiveTab} />
+            <NavItem icon={Layout} label="Resources" id="resources" active={activeTab} set={setActiveTab} />
             <NavItem icon={Settings} label="Settings" id="settings" active={activeTab} set={setActiveTab} />
         </div>
         <div className="p-6 border-t border-white/10">
@@ -220,10 +187,14 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* Mobile Nav Tabs (Visible only on mobile) */}
+      {/* Mobile Nav Tabs */}
       <div className="md:hidden fixed bottom-0 left-0 w-full bg-[#0a0a0a] border-t border-white/10 p-3 z-50 flex justify-around items-center">
          <button onClick={() => setActiveTab('overview')} className={`p-2 rounded-lg ${activeTab === 'overview' ? 'text-blue-500 bg-white/10' : 'text-gray-500'}`}><Home size={20}/></button>
          <button onClick={() => setActiveTab('project')} className={`p-2 rounded-lg ${activeTab === 'project' ? 'text-blue-500 bg-white/10' : 'text-gray-500'}`}><FolderOpen size={20}/></button>
+         
+         {/* New Mobile Documents Button */}
+         <button onClick={() => setActiveTab('documents')} className={`p-2 rounded-lg ${activeTab === 'documents' ? 'text-blue-500 bg-white/10' : 'text-gray-500'}`}><FileText size={20}/></button>
+         
          <button onClick={() => setActiveTab('billing')} className={`p-2 rounded-lg ${activeTab === 'billing' ? 'text-blue-500 bg-white/10' : 'text-gray-500'}`}><CreditCard size={20}/></button>
          <button onClick={handleLogout} className="p-2 text-red-500 rounded-lg"><LogOut size={20}/></button>
       </div>
@@ -233,6 +204,7 @@ export default function Dashboard() {
             <h1 className="text-3xl md:text-4xl font-bold mb-2">
                 {activeTab === 'overview' && `Welcome back, ${user.name.split(' ')[0]} 👋`}
                 {activeTab === 'project' && "Project Dashboard"}
+                {activeTab === 'documents' && "File Manager"} 
                 {activeTab === 'billing' && "Billing & Invoices"}
                 {activeTab === 'resources' && "Project Assets"}
                 {activeTab === 'settings' && "Account Settings"}
@@ -327,13 +299,89 @@ export default function Dashboard() {
                         </div>
                     )}
 
-                    {/* BILLING TAB (NEW & IMPROVED) */}
+                    {/* --- DOCUMENTS TAB (NEW FEATURE) --- */}
+                    {activeTab === 'documents' && (
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            {/* Upload Area */}
+                            <div className="lg:col-span-1">
+                                <div className="bg-[#0a0a0a] border border-white/10 p-6 rounded-3xl h-full flex flex-col">
+                                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                                        <UploadCloud size={20} className="text-blue-500"/> Upload Files
+                                    </h3>
+                                    <p className="text-sm text-gray-400 mb-6">
+                                        Share logos, brand assets, or signed contracts securely.
+                                    </p>
+                                    
+                                    <label className="flex-1 border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center p-8 cursor-pointer hover:border-blue-500/50 hover:bg-white/5 transition-all group">
+                                        <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploading} />
+                                        {uploading ? (
+                                            <Loader2 size={32} className="text-blue-500 animate-spin mb-3" />
+                                        ) : (
+                                            <div className="p-4 bg-white/5 rounded-full mb-3 group-hover:scale-110 transition-transform">
+                                                <UploadCloud size={24} className="text-gray-400 group-hover:text-white" />
+                                            </div>
+                                        )}
+                                        <p className="text-sm font-bold text-gray-300">
+                                            {uploading ? "Uploading..." : "Click to Upload"}
+                                        </p>
+                                        <p className="text-xs text-gray-500 mt-1">Max size 5MB (Images, PDF)</p>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* Files List */}
+                            <div className="lg:col-span-2">
+                                <div className="bg-[#0a0a0a] border border-white/10 p-6 rounded-3xl min-h-[400px]">
+                                    <h3 className="text-xl font-bold mb-6 flex items-center justify-between">
+                                        <span>Shared Documents</span>
+                                        <span className="text-xs font-normal text-gray-500 bg-white/5 px-2 py-1 rounded">
+                                            {projectData.documents?.length || 0} Files
+                                        </span>
+                                    </h3>
+
+                                    <div className="space-y-3">
+                                        {projectData.documents && projectData.documents.length > 0 ? (
+                                            projectData.documents.map((doc, idx) => (
+                                                <div key={idx} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/20 transition-all group">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className={`p-3 rounded-xl ${doc.uploadedBy === 'Admin' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                                                            <File size={20} />
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="text-sm font-bold text-white mb-0.5 line-clamp-1">{doc.name}</h4>
+                                                            <div className="flex gap-2 text-[10px] text-gray-500">
+                                                                <span className="uppercase tracking-wider font-bold">{doc.uploadedBy}</span>
+                                                                <span>•</span>
+                                                                <span>{doc.date}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <a href={doc.url} target="_blank" download className="p-2 bg-black hover:bg-white text-gray-400 hover:text-black rounded-lg transition-colors" title="Download">
+                                                            <Download size={16} />
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="text-center py-20">
+                                                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                    <FolderOpen size={24} className="text-gray-600" />
+                                                </div>
+                                                <p className="text-gray-500">No documents shared yet.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* BILLING TAB */}
                     {activeTab === 'billing' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {/* Invoice Card */}
                             <div className="bg-[#0a0a0a] border border-white/10 p-8 rounded-3xl relative overflow-hidden group hover:border-blue-500/30 transition-all">
                                 <div className="absolute top-0 right-0 p-32 bg-blue-600/5 blur-3xl rounded-full pointer-events-none"></div>
-                                
                                 <div className="flex justify-between items-start mb-8">
                                     <div>
                                         <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Total Budget</p>
@@ -343,44 +391,18 @@ export default function Dashboard() {
                                         {projectData.paymentStatus}
                                     </div>
                                 </div>
-
                                 <div className="space-y-4 mb-8">
-                                    <div className="flex justify-between text-sm border-b border-white/5 pb-3">
-                                        <span className="text-gray-400">Invoice ID</span>
-                                        <span className="font-mono text-white">#INV-{Math.floor(Math.random() * 10000)}</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm border-b border-white/5 pb-3">
-                                        <span className="text-gray-400">Date Issued</span>
-                                        <span className="text-white">{new Date().toLocaleDateString()}</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm border-b border-white/5 pb-3">
-                                        <span className="text-gray-400">Project</span>
-                                        <span className="text-white text-right truncate max-w-[150px]">{projectData.title}</span>
-                                    </div>
+                                    <div className="flex justify-between text-sm border-b border-white/5 pb-3"><span className="text-gray-400">Invoice ID</span><span className="font-mono text-white">#INV-{Math.floor(Math.random() * 10000)}</span></div>
+                                    <div className="flex justify-between text-sm border-b border-white/5 pb-3"><span className="text-gray-400">Date Issued</span><span className="text-white">{new Date().toLocaleDateString()}</span></div>
+                                    <div className="flex justify-between text-sm border-b border-white/5 pb-3"><span className="text-gray-400">Project</span><span className="text-white text-right truncate max-w-[150px]">{projectData.title}</span></div>
                                 </div>
-
-                                <button 
-                                    onClick={generateInvoice}
-                                    className="w-full bg-white text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-200 transition-all shadow-lg hover:shadow-white/10"
-                                >
-                                    <Download size={20} /> Download Professional Invoice
-                                </button>
+                                <button onClick={generateInvoice} className="w-full bg-white text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-200 transition-all shadow-lg hover:shadow-white/10"><Download size={20} /> Download Professional Invoice</button>
                             </div>
-
-                            {/* Payment Info Card */}
                             <div className="bg-[#0a0a0a] border border-white/10 p-8 rounded-3xl">
                                 <h3 className="text-xl font-bold mb-6 flex items-center gap-2"><CreditCard size={20} className="text-blue-500"/> Payment Methods</h3>
-                                <div className="p-4 bg-white/5 rounded-xl border border-white/5 mb-4">
-                                    <p className="text-sm text-gray-300 mb-1">Bank Transfer (UPI/NEFT)</p>
-                                    <p className="text-xs text-gray-500 font-mono">9330680642@upi</p>
-                                </div>
-                                <div className="p-4 bg-white/5 rounded-xl border border-white/5">
-                                    <p className="text-sm text-gray-300 mb-1">International Payments</p>
-                                    <p className="text-xs text-gray-500">Contact admin for PayPal/Wise link.</p>
-                                </div>
-                                <p className="text-xs text-gray-600 mt-6 italic">
-                                    * Please share the transaction screenshot after payment.
-                                </p>
+                                <div className="p-4 bg-white/5 rounded-xl border border-white/5 mb-4"><p className="text-sm text-gray-300 mb-1">Bank Transfer (UPI/NEFT)</p><p className="text-xs text-gray-500 font-mono">9330680642@upi</p></div>
+                                <div className="p-4 bg-white/5 rounded-xl border border-white/5"><p className="text-sm text-gray-300 mb-1">International Payments</p><p className="text-xs text-gray-500">Contact admin for PayPal/Wise link.</p></div>
+                                <p className="text-xs text-gray-600 mt-6 italic">* Please share the transaction screenshot after payment.</p>
                             </div>
                         </div>
                     )}
@@ -412,6 +434,7 @@ export default function Dashboard() {
   );
 }
 
+// Reusable Components
 const NavItem = ({ icon: Icon, label, id, active, set }) => (
     <button onClick={() => set(id)} className={`flex items-center gap-3 px-4 py-3 mx-2 rounded-xl transition-all duration-300 group ${active === id ? "bg-white text-black font-bold shadow-lg" : "text-gray-400 hover:text-white hover:bg-white/5"}`}>
         <Icon size={20} className={active === id ? "text-black" : "text-gray-500 group-hover:text-white"} /> {label} {active === id && <ChevronRight size={16} className="ml-auto opacity-50"/>}

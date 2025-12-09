@@ -4,16 +4,27 @@ const ClientProjectSchema = new mongoose.Schema(
   {
     clientEmail: { type: String, required: true },
     title: { type: String, required: true },
-    // Naye Advanced Fields
-    description: { type: String, default: "" }, // Project Brief
-    budget: { type: String, default: "TBD" }, // e.g. "$5000"
-    paymentStatus: { type: String, default: "Pending" }, // Paid, Partial, Pending
+    description: { type: String, default: "" },
+    budget: { type: String, default: "TBD" },
+    paymentStatus: { type: String, default: "Pending" },
+    
     links: { 
         type: [{ title: String, url: String }], 
         default: [] 
-    }, // Useful links (Figma, Drive, Invoice)
-    
-    // Purane Fields
+    },
+
+    // --- NEW: Documents Section ---
+    documents: {
+        type: [{
+            name: String,
+            url: String,
+            uploadedBy: String, // 'Client' or 'Admin'
+            date: String
+        }],
+        default: []
+    },
+    // ------------------------------
+
     status: { type: String, default: "Active" },
     progress: { type: Number, default: 0 },
     nextMilestone: { type: String, default: "Discovery" },

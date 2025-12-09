@@ -1,14 +1,18 @@
+import withPWAInit from "next-pwa";
+
+const withPWA = withPWAInit({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === "development", // Development me disable rahega
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-    ],
-    domains: ['images.unsplash.com', 'randomuser.me'],
+    domains: ["res.cloudinary.com"], // Cloudinary images allow karne ke liye
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);

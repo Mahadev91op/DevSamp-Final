@@ -7,14 +7,12 @@ import {
   Trash2, Search, ExternalLink, CreditCard, Star, MessageCircle, 
   TrendingUp, Filter, Rss, Download, Wand2, Eye, Mail, 
   ChevronLeft, ChevronRight, Image as ImageIcon, Maximize2, Minimize2, 
-  BarChart3, Activity, ArrowRight, Zap, FolderKanban, Clock, Save, Link as LinkIcon, DollarSign, FileText
+  BarChart3, Activity, ArrowRight, Zap, FolderKanban, Clock, Save, Link as LinkIcon, DollarSign, FileText,
+  UploadCloud, File, Calendar as CalendarIcon // <-- NEW ICON
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// ... (Baaki purane helper functions same rahenge: getTimeRangeConfig, filterAndGroupData, gradientOptions, LineChart, BarChart, Toast, StatCard, Pagination)
-// ... (Sirf Form Logic aur JSX change kar raha hu niche)
-
-// --- HELPERS FOR DATE LOGIC (SAME AS BEFORE) ---
+// --- HELPERS (SAME AS BEFORE) ---
 const getTimeRangeConfig = (range) => {
     const now = new Date();
     switch(range) {
@@ -82,7 +80,6 @@ const filterAndGroupData = (items, range) => {
     return { labels, data: finalData };
 };
 
-// ... (Gradient Options same)
 const gradientOptions = [
     { name: "Blue", class: "from-blue-500 to-cyan-500" },
     { name: "Purple", class: "from-purple-500 to-pink-500" },
@@ -91,7 +88,6 @@ const gradientOptions = [
     { name: "Dark", class: "from-gray-700 to-black" },
 ];
 
-// ... (Charts and Toast Components same)
 const LineChart = ({ data, labels, expanded, onToggleExpand, timeRange, setTimeRange, color = "blue" }) => {
   const [hoveredVal, setHoveredVal] = useState(null);
   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -179,7 +175,6 @@ const StatCard = ({ title, value, icon: Icon, color, trend, onClick }) => (<div 
 const Pagination = ({ total, perPage, current, onChange }) => { const pages = Math.ceil(total / perPage); if (pages <= 1) return null; return (<div className="flex items-center justify-end gap-2 mt-4"><button disabled={current === 1} onClick={() => onChange(current - 1)} className="p-2 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"><ChevronLeft size={16}/></button><span className="text-xs text-gray-400">Page {current} of {pages}</span><button disabled={current === pages} onClick={() => onChange(current + 1)} className="p-2 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"><ChevronRight size={16}/></button></div>); };
 
 export default function AdminPanel() {
-  // ... (State logic same)
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [activeTab, setActiveTab] = useState("dashboard"); 
@@ -187,6 +182,7 @@ export default function AdminPanel() {
   const [toast, setToast] = useState(null); 
   const [loading, setLoading] = useState(false);
   const [extracting, setExtracting] = useState(false);
+  const [uploading, setUploading] = useState(false); 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(""); 
   const [searchTerm, setSearchTerm] = useState("");
@@ -194,10 +190,12 @@ export default function AdminPanel() {
   const [viewLead, setViewLead] = useState(null);
   const [leadsTimeRange, setLeadsTimeRange] = useState('7D');
   const [expandedChart, setExpandedChart] = useState(null); 
+  
+  // --- NEW: CALENDAR STATE ---
+  const [calendarDate, setCalendarDate] = useState(new Date());
 
   const [data, setData] = useState({ leads: [], services: [], team: [], projects: [], pricing: [], reviews: [], blogs: [], clientProjects: [] });
   
-  // Forms - Updated clientProject with new fields
   const [forms, setForms] = useState({
     project: { id: null, title: "", category: "", image: "", tech: "", link: "" },
     service: { title: "", desc: "", icon: "Monitor", color: "text-blue-500", gradient: "from-blue-500 to-cyan-500" },
@@ -207,7 +205,8 @@ export default function AdminPanel() {
     review: { id: null, name: "", role: "", text: "", rating: 5, image: "" },
     clientProject: { 
         id: null, title: "", clientEmail: "", status: "Active", progress: 0, nextMilestone: "Discovery", dueDate: "TBD", 
-        description: "", budget: "", paymentStatus: "Pending", links: [], // New Fields
+        description: "", budget: "", paymentStatus: "Pending", links: [], 
+        documents: [], 
         stages: [
             { id: 1, title: "Discovery", status: "pending", date: "Pending" },
             { id: 2, title: "UI/UX Design", status: "pending", date: "Pending" },
@@ -300,21 +299,12 @@ export default function AdminPanel() {
     if(!forms[type]) return;
     setModalType(type);
     
-    // ... (Purani mapping same)
-    if(type === 'project') setForms(p => ({ ...p, project: item ? { ...item, id: item._id, tech: item.tech.join(', ') } : { id: null, title: "", category: "", image: "", tech: "", link: "" } }));
-    if(type === 'service') setForms(p => ({ ...p, service: item ? { ...item, id: item._id } : { title: "", desc: "", icon: "Monitor", color: "text-blue-500", gradient: "from-blue-500 to-cyan-500" } }));
-    if(type === 'team') setForms(p => ({ ...p, team: item ? { ...item, id: item._id } : { id: null, name: "", role: "", image: "", desc: "" } }));
-    if(type === 'pricing') setForms(p => ({ ...p, pricing: item ? { ...item, id: item._id, features: item.features.join(','), missing: item.missing.join(','), popular: item.popular, gradient: item.gradient || "from-gray-500 to-gray-700" } : { id: null, name: "", desc: "", priceMonthly: "", priceYearly: "", features: "", missing: "", popular: false, gradient: "from-gray-500 to-gray-700" } }));
-    if(type === 'blog') setForms(p => ({ ...p, blog: item ? { ...item, id: item._id } : { id: null, link: "", title: "", desc: "", image: "", category: "", platform: "other" } }));
-    if(type === 'review') setForms(p => ({ ...p, review: item ? { ...item, id: item._id } : { id: null, name: "", role: "", text: "", rating: 5, image: "" } }));
-    
-    // Updated Client Project Logic with New Fields
     if(type === 'clientProject') {
         setForms(p => ({ 
             ...p, 
-            clientProject: item ? { ...item, id: item._id, links: item.links || [] } : { 
+            clientProject: item ? { ...item, id: item._id, links: item.links || [], documents: item.documents || [] } : { 
                 id: null, title: "", clientEmail: "", status: "Active", progress: 0, nextMilestone: "Discovery", dueDate: "TBD", 
-                description: "", budget: "", paymentStatus: "Pending", links: [],
+                description: "", budget: "", paymentStatus: "Pending", links: [], documents: [],
                 stages: [
                     { id: 1, title: "Discovery", status: "pending", date: "Pending" },
                     { id: 2, title: "UI/UX Design", status: "pending", date: "Pending" },
@@ -325,7 +315,13 @@ export default function AdminPanel() {
                 updates: [] 
             } 
         }));
-    }
+    } 
+    else if(type === 'project') setForms(p => ({ ...p, project: item ? { ...item, id: item._id, tech: item.tech.join(', ') } : { id: null, title: "", category: "", image: "", tech: "", link: "" } }));
+    else if(type === 'service') setForms(p => ({ ...p, service: item ? { ...item, id: item._id } : { title: "", desc: "", icon: "Monitor", color: "text-blue-500", gradient: "from-blue-500 to-cyan-500" } }));
+    else if(type === 'team') setForms(p => ({ ...p, team: item ? { ...item, id: item._id } : { id: null, name: "", role: "", image: "", desc: "" } }));
+    else if(type === 'pricing') setForms(p => ({ ...p, pricing: item ? { ...item, id: item._id, features: item.features.join(','), missing: item.missing.join(','), popular: item.popular, gradient: item.gradient || "from-gray-500 to-gray-700" } : { id: null, name: "", desc: "", priceMonthly: "", priceYearly: "", features: "", missing: "", popular: false, gradient: "from-gray-500 to-gray-700" } }));
+    else if(type === 'blog') setForms(p => ({ ...p, blog: item ? { ...item, id: item._id } : { id: null, link: "", title: "", desc: "", image: "", category: "", platform: "other" } }));
+    else if(type === 'review') setForms(p => ({ ...p, review: item ? { ...item, id: item._id } : { id: null, name: "", role: "", text: "", rating: 5, image: "" } }));
 
     setIsModalOpen(true);
   };
@@ -354,12 +350,51 @@ export default function AdminPanel() {
     setLoading(false);
   };
 
+  const handleAdminFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const uploadRes = await fetch("/api/upload", {
+            method: "POST",
+            body: formData
+        });
+        const uploadData = await uploadRes.json();
+
+        if (uploadRes.ok) {
+            const newDoc = {
+                name: file.name,
+                url: uploadData.url,
+                uploadedBy: "Admin",
+                date: new Date().toLocaleDateString()
+            };
+
+            setForms(p => ({
+                ...p,
+                clientProject: {
+                    ...p.clientProject,
+                    documents: [newDoc, ...p.clientProject.documents]
+                }
+            }));
+            showToast("File Ready (Click Save to Confirm)");
+        } else {
+            showToast("Upload Failed", "error");
+        }
+    } catch (error) {
+        showToast("Network Error", "error");
+    }
+    setUploading(false);
+  };
+
   const addProjectUpdate = () => {
     const newUpdate = { title: "New Update", desc: "Description here", date: new Date().toLocaleDateString() };
     setForms(prev => ({ ...prev, clientProject: { ...prev.clientProject, updates: [newUpdate, ...prev.clientProject.updates] } }));
   };
 
-  // Helper to add links
   const addProjectLink = () => {
     const newLink = { title: "New Resource", url: "https://" };
     setForms(prev => ({ ...prev, clientProject: { ...prev.clientProject, links: [...prev.clientProject.links, newLink] } }));
@@ -396,6 +431,7 @@ export default function AdminPanel() {
                 <p className="px-4 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-2 mt-6">CRM</p>
                 <NavItem icon={Users} label="Inquiries (Leads)" id="leads" active={activeTab} set={(id) => { setActiveTab(id); setSidebarOpen(false); }} badge={data.leads.filter(l=>l.status==='New').length} />
                 <NavItem icon={FolderKanban} label="Client Projects" id="client-projects" active={activeTab} set={(id) => { setActiveTab(id); setSidebarOpen(false); }} /> 
+                <NavItem icon={CalendarIcon} label="Project Calendar" id="calendar" active={activeTab} set={(id) => { setActiveTab(id); setSidebarOpen(false); }} /> {/* NEW ITEM */}
                 <NavItem icon={MessageCircle} label="Testimonials" id="reviews" active={activeTab} set={(id) => { setActiveTab(id); setSidebarOpen(false); }} />
                 <p className="px-4 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-2 mt-6">CMS</p>
                 <NavItem icon={ExternalLink} label="Projects (Portfolio)" id="projects" active={activeTab} set={(id) => { setActiveTab(id); setSidebarOpen(false); }} />
@@ -415,7 +451,6 @@ export default function AdminPanel() {
 
             <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative">
                 
-                {/* 1. DASHBOARD, LEADS, etc (Same as before) */}
                 {activeTab === 'dashboard' && (
                     <div className="space-y-6 md:space-y-8 animate-fade-in max-w-7xl mx-auto pb-20 md:pb-0">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -459,7 +494,6 @@ export default function AdminPanel() {
                     </div>
                 )}
 
-                {/* 3. NEW CLIENT PROJECTS TAB (FULL CONTROL WITH ULTRA FEATURES) */}
                 {activeTab === 'client-projects' && (
                     <div className="space-y-6 animate-fade-in max-w-7xl mx-auto pb-20 md:pb-0">
                         <div className="flex justify-between items-center bg-[#0a0a0a] p-4 rounded-2xl border border-white/5">
@@ -498,10 +532,71 @@ export default function AdminPanel() {
                     </div>
                 )}
 
-                {/* 4. GENERIC CMS TABS (Others) */}
+                {/* --- NEW: CALENDAR TAB --- */}
+                {activeTab === 'calendar' && (
+                    <div className="space-y-6 animate-fade-in max-w-7xl mx-auto pb-20 md:pb-0">
+                        <div className="bg-[#0a0a0a] border border-white/5 rounded-3xl p-6">
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                                    <CalendarIcon className="text-blue-500" /> Project Deadlines
+                                </h3>
+                                <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1">
+                                    <button onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1))} className="p-2 hover:bg-white/10 rounded-md text-gray-400 hover:text-white transition-colors"><ChevronLeft size={18}/></button>
+                                    <span className="text-sm font-bold text-white px-2 min-w-[120px] text-center">{calendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+                                    <button onClick={() => setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1))} className="p-2 hover:bg-white/10 rounded-md text-gray-400 hover:text-white transition-colors"><ChevronRight size={18}/></button>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-7 gap-1 md:gap-2">
+                                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                                    <div key={d} className="text-center text-xs font-bold text-gray-600 uppercase py-2">{d}</div>
+                                ))}
+                                {(() => {
+                                    const year = calendarDate.getFullYear();
+                                    const month = calendarDate.getMonth();
+                                    const daysInMonth = new Date(year, month + 1, 0).getDate();
+                                    const firstDay = new Date(year, month, 1).getDay();
+                                    const days = [];
+
+                                    // Empty cells for previous month
+                                    for (let i = 0; i < firstDay; i++) {
+                                        days.push(<div key={`empty-${i}`} className="h-16 md:h-24 bg-transparent border border-white/5 opacity-10 rounded-lg"></div>);
+                                    }
+
+                                    // Days with data
+                                    for (let d = 1; d <= daysInMonth; d++) {
+                                        const dateStr = new Date(year, month, d).toLocaleDateString();
+                                        // Simple string matching. Note: dueDate needs to be parseable or exact string match if stored nicely
+                                        const dueProjects = data.clientProjects.filter(p => {
+                                            // Try to parse p.dueDate. If "TBD", ignore.
+                                            const pDate = new Date(p.dueDate);
+                                            return !isNaN(pDate) && pDate.getDate() === d && pDate.getMonth() === month && pDate.getFullYear() === year;
+                                        });
+
+                                        const isToday = new Date().getDate() === d && new Date().getMonth() === month && new Date().getFullYear() === year;
+
+                                        days.push(
+                                            <div key={d} className={`h-16 md:h-24 bg-white/5 border ${isToday ? 'border-blue-500' : 'border-white/5'} rounded-lg p-2 flex flex-col hover:bg-white/10 transition-colors group relative overflow-hidden`}>
+                                                <span className={`text-xs font-bold mb-1 ${isToday ? 'text-blue-400' : 'text-gray-500 group-hover:text-white'}`}>{d}</span>
+                                                <div className="flex-1 flex flex-col gap-1 overflow-y-auto custom-scrollbar">
+                                                    {dueProjects.map(p => (
+                                                        <div key={p._id} className="text-[9px] bg-blue-600/20 text-blue-300 px-1.5 py-0.5 rounded truncate border border-blue-500/20 cursor-pointer hover:bg-blue-600 hover:text-white transition-colors" onClick={() => handleEditItem(p)} title={p.title}>
+                                                            {p.title}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+                                    return days;
+                                })()}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {['services', 'team', 'projects', 'pricing', 'reviews', 'blogs'].includes(activeTab) && (
                     <div className="space-y-6 animate-fade-in max-w-7xl mx-auto pb-20 md:pb-0">
-                        {/* Search and Add Buttons logic... same as before */}
                         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                             <div className="relative w-full md:w-80">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
@@ -514,11 +609,9 @@ export default function AdminPanel() {
                             )}
                         </div>
 
-                        {/* Existing Cards Logic... same as before */}
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                             {paginatedData.map((item) => (
                                 <div key={item._id} className="bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden group hover:border-white/20 transition-all flex flex-col relative">
-                                    
                                     {(item.image || activeTab === 'blogs' || activeTab === 'projects') && (
                                         <div className="h-48 bg-gray-900 relative overflow-hidden">
                                             {item.image ? (
@@ -532,31 +625,21 @@ export default function AdminPanel() {
                                             </div>
                                         </div>
                                     )}
-
                                     <div className="p-5 flex-1 flex flex-col">
                                         <div className="flex gap-2 mb-3">
                                             {item.category && <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-2 py-1 rounded uppercase tracking-wider">{item.category}</span>}
                                             {item.role && <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-1 rounded uppercase tracking-wider">{item.role}</span>}
                                             {item.popular && <span className="text-[10px] font-bold text-yellow-400 bg-yellow-500/10 px-2 py-1 rounded uppercase tracking-wider">Popular</span>}
                                         </div>
-
                                         <h4 className="font-bold text-lg text-white mb-1 line-clamp-1">{item.title || item.name}</h4>
                                         <p className="text-sm text-gray-400 line-clamp-2 flex-1">{item.desc || item.text || item.message}</p>
-                                        
                                         {item.priceMonthly && <div className="mt-4 text-xl font-bold">${item.priceMonthly}<span className="text-xs font-normal text-gray-500">/mo</span></div>}
-
                                         {activeTab === 'services' && !item.image && (
-                                            <div className="absolute top-4 right-4 p-2 bg-white/5 rounded-lg text-gray-400 group-hover:text-white">
-                                                <Layers size={20}/>
-                                            </div>
+                                            <div className="absolute top-4 right-4 p-2 bg-white/5 rounded-lg text-gray-400 group-hover:text-white"><Layers size={20}/></div>
                                         )}
-                                        
                                         {activeTab === 'reviews' && (
-                                            <div className="flex gap-1 mt-3 text-yellow-500">
-                                                {[...Array(item.rating || 5)].map((_,i)=><Star key={i} size={12} fill="currentColor"/>)}
-                                            </div>
+                                            <div className="flex gap-1 mt-3 text-yellow-500">{[...Array(item.rating || 5)].map((_,i)=><Star key={i} size={12} fill="currentColor"/>)}</div>
                                         )}
-
                                         {!item.image && activeTab !== 'blogs' && activeTab !== 'projects' && (
                                             <div className="flex gap-2 mt-4 pt-4 border-t border-white/5 justify-end">
                                                 <button onClick={() => handleEditItem(item)} className="text-xs font-bold text-blue-400 hover:text-white uppercase tracking-wider">Edit</button>
@@ -583,27 +666,14 @@ export default function AdminPanel() {
         </main>
 
         <AnimatePresence>
-            {/* View Lead Modal (Existing) */}
             {viewLead && (
                 <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[#111] border border-white/10 p-8 rounded-2xl w-full max-w-lg shadow-2xl relative">
                         <button onClick={() => setViewLead(null)} className="absolute top-4 right-4 text-gray-500 hover:text-white"><X size={20}/></button>
                         <h3 className="text-2xl font-bold text-white mb-1">{viewLead.name}</h3>
                         <p className="text-sm text-gray-500 mb-6 flex items-center gap-2"><Mail size={12}/> {viewLead.email}</p>
-                        
-                        <div className="bg-white/5 p-4 rounded-xl border border-white/5 mb-6">
-                            <label className="text-xs text-blue-400 font-bold uppercase tracking-wider mb-2 block">Message</label>
-                            <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{viewLead.message}</p>
-                        </div>
-
-                        <div className="flex gap-4">
-                            <a href={`mailto:${viewLead.email}`} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors">
-                                <Mail size={18}/> Reply via Email
-                            </a>
-                            <button onClick={() => { setViewLead(null); handleDelete('contact', viewLead._id); }} className="px-4 border border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all">
-                                <Trash2 size={18}/>
-                            </button>
-                        </div>
+                        <div className="bg-white/5 p-4 rounded-xl border border-white/5 mb-6"><label className="text-xs text-blue-400 font-bold uppercase tracking-wider mb-2 block">Message</label><p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{viewLead.message}</p></div>
+                        <div className="flex gap-4"><a href={`mailto:${viewLead.email}`} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors"><Mail size={18}/> Reply via Email</a><button onClick={() => { setViewLead(null); handleDelete('contact', viewLead._id); }} className="px-4 border border-red-500/30 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all"><Trash2 size={18}/></button></div>
                     </motion.div>
                 </div>
             )}
@@ -621,12 +691,10 @@ export default function AdminPanel() {
                         
                         <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
                             
-                            {/* --- NEW CLIENT PROJECT FORM --- */}
                             {modalType === 'clientProject' && (
                                 <div className="space-y-5">
                                     <FormInput label="Project Title" value={forms.clientProject.title} onChange={e=>setForms(p=>({...p, clientProject:{...p.clientProject, title:e.target.value}}))} />
                                     <FormInput label="Client Email (Must Match User Login)" value={forms.clientProject.clientEmail} onChange={e=>setForms(p=>({...p, clientProject:{...p.clientProject, clientEmail:e.target.value}}))} />
-                                    
                                     <FormTextarea label="Project Description / Brief" value={forms.clientProject.description} onChange={e=>setForms(p=>({...p, clientProject:{...p.clientProject, description:e.target.value}}))} />
 
                                     <div className="flex gap-4">
@@ -638,7 +706,7 @@ export default function AdminPanel() {
                                                 <option value="Completed">Completed</option>
                                             </select>
                                         </div>
-                                        <FormInput label="Due Date" value={forms.clientProject.dueDate} onChange={e=>setForms(p=>({...p, clientProject:{...p.clientProject, dueDate:e.target.value}}))} />
+                                        <FormInput label="Due Date" value={forms.clientProject.dueDate} onChange={e=>setForms(p=>({...p, clientProject:{...p.clientProject, dueDate:e.target.value}}))} placeholder="YYYY-MM-DD" />
                                     </div>
 
                                     <div className="flex gap-4">
@@ -658,7 +726,6 @@ export default function AdminPanel() {
                                         <input type="range" min="0" max="100" value={forms.clientProject.progress} onChange={e=>setForms(p=>({...p, clientProject:{...p.clientProject, progress:Number(e.target.value)}}))} className="w-full accent-blue-500 h-2 bg-white/10 rounded-full appearance-none cursor-pointer" />
                                     </div>
 
-                                    {/* RESOURCES & LINKS SECTION */}
                                     <div className="space-y-3 bg-white/5 p-4 rounded-2xl border border-white/5">
                                         <div className="flex justify-between items-center">
                                             <h4 className="text-sm font-bold text-white flex items-center gap-2"><LinkIcon size={14}/> Resources & Links</h4>
@@ -685,7 +752,35 @@ export default function AdminPanel() {
                                         ))}
                                     </div>
 
-                                    {/* STAGES SECTION */}
+                                    <div className="space-y-3 bg-white/5 p-4 rounded-2xl border border-white/5">
+                                        <div className="flex justify-between items-center">
+                                            <h4 className="text-sm font-bold text-white flex items-center gap-2"><File size={14}/> Project Documents</h4>
+                                            <label className="text-[10px] bg-purple-600 px-2 py-1 rounded text-white hover:bg-purple-700 cursor-pointer flex items-center gap-1">
+                                                {uploading ? <Loader2 className="animate-spin" size={10}/> : <UploadCloud size={10}/>} Upload
+                                                <input type="file" className="hidden" onChange={handleAdminFileUpload} disabled={uploading} />
+                                            </label>
+                                        </div>
+                                        {forms.clientProject.documents.length === 0 && <p className="text-xs text-gray-500 italic">No documents uploaded.</p>}
+                                        <div className="space-y-2">
+                                            {forms.clientProject.documents.map((doc, i) => (
+                                                <div key={i} className="flex justify-between items-center bg-black/40 p-2 rounded-lg border border-white/5">
+                                                    <div className="flex items-center gap-2 overflow-hidden">
+                                                        <File size={12} className="text-gray-400 shrink-0"/>
+                                                        <span className="text-xs text-gray-300 truncate max-w-[150px]">{doc.name}</span>
+                                                        <span className="text-[9px] text-gray-600 uppercase border border-white/10 px-1 rounded">{doc.uploadedBy}</span>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <a href={doc.url} target="_blank" className="text-blue-400 hover:text-white"><ExternalLink size={12}/></a>
+                                                        <button type="button" onClick={() => {
+                                                            const newDocs = forms.clientProject.documents.filter((_, idx) => idx !== i);
+                                                            setForms(p => ({...p, clientProject:{...p.clientProject, documents: newDocs}}));
+                                                        }} className="text-red-500 hover:text-red-400"><Trash2 size={12}/></button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
                                     <div className="space-y-3 bg-white/5 p-4 rounded-2xl border border-white/5">
                                         <h4 className="text-sm font-bold text-white flex items-center gap-2"><Layers size={14}/> Stages</h4>
                                         {forms.clientProject.stages.map((stage, i) => (
@@ -708,7 +803,6 @@ export default function AdminPanel() {
                                         ))}
                                     </div>
 
-                                    {/* UPDATES SECTION */}
                                     <div className="space-y-3 bg-white/5 p-4 rounded-2xl border border-white/5">
                                         <div className="flex justify-between items-center">
                                             <h4 className="text-sm font-bold text-white flex items-center gap-2"><Rss size={14}/> Recent Updates</h4>
@@ -737,7 +831,6 @@ export default function AdminPanel() {
                                 </div>
                             )}
 
-                            {/* ... (Other Forms: blog, project, service, team, pricing, review - SAME AS BEFORE) */}
                             {modalType === 'blog' && (
                                 <div className="space-y-4">
                                     <div className="flex gap-2 p-3 bg-blue-500/5 rounded-xl border border-blue-500/10">

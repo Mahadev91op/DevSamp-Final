@@ -1,20 +1,20 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import ClientProject from '@/models/ClientProject';
+import { sendEmail } from '@/lib/email'; // <-- Import Helper
 
-// 1. GET (Admin gets ALL, User gets THEIRS)
+// 1. GET
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const email = searchParams.get('email'); // Agar email hai to user ka project, nahi to sabka (Admin)
-
+    const email = searchParams.get('email');
     await connectDB();
     
     let projects;
     if (email) {
-        projects = await ClientProject.findOne({ clientEmail: email }); // User specific
+        projects = await ClientProject.findOne({ clientEmail: email });
     } else {
-        projects = await ClientProject.find().sort({ createdAt: -1 }); // Admin (All)
+        projects = await ClientProject.find().sort({ createdAt: -1 });
     }
 
     return NextResponse.json({ projects }, { status: 200 });
@@ -23,24 +23,58 @@ export async function GET(request) {
   }
 }
 
-// 2. POST (Admin Creates New Project)
+// 2. POST
 export async function POST(request) {
   try {
     const body = await request.json();
     await connectDB();
     await ClientProject.create(body);
+    
+    // New Project Notification to Client
+    await sendEmail(
+        body.clientEmail,
+        "Welcome to DevSamp Dashboard!",
+        `Hi,\n\nYour project "${body.title}" has been created. You can now login to view progress.`
+    );
+
     return NextResponse.json({ message: "Client Project Created!" }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ message: "Error creating project" }, { status: 500 });
   }
 }
 
-// 3. PUT (Admin Updates Project - Progress, Stages, Updates)
+// 3. PUT (Update Status & Notify)
 export async function PUT(request) {
   try {
     const { id, ...data } = await request.json();
     await connectDB();
+
+    // Pehle purana project fetch karo email lene ke liye
+    const existingProject = await ClientProject.findById(id);
+
+    // Update Project
     await ClientProject.findByIdAndUpdate(id, data);
+
+    // --- EMAIL LOGIC ---
+    if (existingProject && data.status && data.status !== existingProject.status) {
+        // Agar Status change hua hai
+        await sendEmail(
+            existingProject.clientEmail,
+            `Project Update: ${existingProject.title}`,
+            `Hi,\n\nYour project status has been updated to: ${data.status}.\n\nCheck your dashboard for details.`
+        );
+    }
+    
+    if (existingProject && data.progress && data.progress === 100 && existingProject.progress !== 100) {
+        // Agar Project 100% complete hua hai
+        await sendEmail(
+            existingProject.clientEmail,
+            `🎉 Project Completed: ${existingProject.title}`,
+            `Congratulations! Your project "${existingProject.title}" is fully completed.\n\nPlease review everything on your dashboard.`
+        );
+    }
+    // -------------------
+
     return NextResponse.json({ message: "Project Updated Successfully!" }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ message: "Error updating project" }, { status: 500 });
