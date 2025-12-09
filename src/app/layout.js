@@ -17,11 +17,63 @@ import Chatbot from "@/components/Chatbot";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
-// --- METADATA UPDATE FOR PWA ---
+// --- IMPROVED SEO METADATA ---
 export const metadata = {
-  title: "DevSamp | Modern Web Agency",
-  description: "Transforming ideas into digital reality.",
-  manifest: "/manifest.json", // <-- YE LINE ADD KI HAI
+  metadataBase: new URL('https://devsamp.com'), // Apna actual domain yahan dalein
+  title: {
+    default: "DevSamp | Creative Web & App Development Agency",
+    template: "%s | DevSamp Agency"
+  },
+  description: "DevSamp is a premium digital agency providing Web Development, UI/UX Design, and App Solutions. We transform ideas into digital reality with Next.js and modern tech.",
+  keywords: ["Web Development", "App Development", "UI/UX Design", "Next.js Agency", "React Developers", "Digital Agency India", "DevSamp", "Freelance Web Developer", "SEO Services"],
+  authors: [{ name: "DevSamp Team", url: "https://devsamp.com" }],
+  creator: "DevSamp",
+  publisher: "DevSamp Agency",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon-192.png",
+  },
+  openGraph: {
+    title: "DevSamp | Modern Digital Agency",
+    description: "Transforming ideas into digital reality. Expert Web & App Development services.",
+    url: 'https://devsamp.com',
+    siteName: 'DevSamp',
+    images: [
+      {
+        url: '/icon-512.png', // Apna banner image yahan use karein
+        width: 800,
+        height: 600,
+        alt: 'DevSamp Agency Logo',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'DevSamp Agency',
+    description: 'Transforming ideas into digital reality.',
+    images: ['/icon-512.png'], 
+    creator: '@devsamp1st',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -29,36 +81,57 @@ export const metadata = {
   },
 };
 
-// --- VIEWPORT SETTINGS (Theme Color) ---
 export const viewport = {
   themeColor: "#000000",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  maximumScale: 5, // Accessibility ke liye zoom allow kiya hai
+  userScalable: true,
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning={true}>
+      <head>
+        {/* JSON-LD Schema for Organization SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "DevSamp",
+              "url": "https://devsamp.com",
+              "logo": "https://devsamp.com/icon-512.png",
+              "sameAs": [
+                "https://x.com/devsamp1st",
+                "https://www.instagram.com/devsamp1st/",
+                "https://www.youtube.com/@DevSamp1st",
+                "https://www.freelancer.in/u/DevSamp"
+              ],
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": "+91-9330680642",
+                "contactType": "customer service",
+                "email": "devsamp1st@gmail.com"
+              }
+            })
+          }}
+        />
+      </head>
       <body 
         className={`${inter.variable} ${outfit.variable} bg-black text-white antialiased`}
         suppressHydrationWarning={true}
       >
-        
-        {/* --- GLOBAL FEATURES --- */}
         <Preloader />
         <ProgressBar />
         <WhatsAppBtn />
         <Chatbot />
-        
         <CustomCursor />
         <Noise />
         <ScrollToTop />
-        
-        {/* --- MAIN LAYOUT --- */}
         <Navbar />
         {children}
-        
       </body>
     </html>
   );

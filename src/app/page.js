@@ -9,7 +9,13 @@ import Portfolio from "@/sections/Portfolio";
 import Testimonials from "@/sections/Testimonials";
 import Contact from "@/sections/Contact";
 import Footer from "@/components/Footer";
-import Blogs from "@/sections/Blogs"; // <-- Import kiya
+import Blogs from "@/sections/Blogs";
+
+// Specific Metadata for Homepage
+export const metadata = {
+  title: "DevSamp | Transform Ideas into Digital Reality",
+  description: "DevSamp offers top-tier web development, app creation, and UI/UX design services. Hire expert developers for your next big project.",
+};
 
 export default function Home() {
   return (
@@ -21,7 +27,7 @@ export default function Home() {
       <Process />
       <Portfolio />
       <Pricing />
-      <Blogs /> {/* <-- Yahan Add kiya (Pricing ke baad) */}
+      <Blogs />
       <FAQ /> 
       <Testimonials />
       <Contact />

@@ -4,14 +4,19 @@ const withPWA = withPWAInit({
   dest: "public",
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === "development", // Development me disable rahega
+  disable: process.env.NODE_ENV === "development",
 });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["res.cloudinary.com"], // Cloudinary images allow karne ke liye
+    // Yahan humne saare domains add kar diye hain
+    domains: [
+      "res.cloudinary.com", 
+      "images.unsplash.com", 
+      "randomuser.me"
+    ], 
   },
 };
 
