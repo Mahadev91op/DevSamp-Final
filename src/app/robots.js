@@ -3,8 +3,8 @@ export default function robots() {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: '/admin/', // Admin panel ko SEO se chupana zaroori hai
+      disallow: '/admin/',
     },
-    sitemap: 'https://devsamp.com/sitemap.xml', // Apna domain update karein
+    sitemap: 'https://www.devsamp.online/sitemap.xml', // यहाँ नया डोमेन अपडेट करें
   }
 }

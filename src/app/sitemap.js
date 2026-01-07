@@ -1,5 +1,5 @@
 export default function sitemap() {
-  const baseUrl = 'https://devsamp.com'; // Apna domain yahan update karein
+  const baseUrl = 'https://www.devsamp.online'; // यहाँ नया डोमेन अपडेट किया गया है
 
   return [
     {

@@ -19,14 +19,14 @@ const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 // --- IMPROVED SEO METADATA ---
 export const metadata = {
-  metadataBase: new URL('https://devsamp.com'), // Apna actual domain yahan dalein
+  metadataBase: new URL('https://www.devsamp.online'), // Apna actual domain yahan dalein
   title: {
     default: "DevSamp | Creative Web & App Development Agency",
     template: "%s | DevSamp Agency"
   },
   description: "DevSamp is a premium digital agency providing Web Development, UI/UX Design, and App Solutions. We transform ideas into digital reality with Next.js and modern tech.",
   keywords: ["Web Development", "App Development", "UI/UX Design", "Next.js Agency", "React Developers", "Digital Agency India", "DevSamp", "Freelance Web Developer", "SEO Services"],
-  authors: [{ name: "DevSamp Team", url: "https://devsamp.com" }],
+  authors: [{ name: "DevSamp Team", url: "https://www.devsamp.online" }],
   creator: "DevSamp",
   publisher: "DevSamp Agency",
   formatDetection: {
@@ -43,7 +43,7 @@ export const metadata = {
   openGraph: {
     title: "DevSamp | Modern Digital Agency",
     description: "Transforming ideas into digital reality. Expert Web & App Development services.",
-    url: 'https://devsamp.com',
+    url: 'https://www.devsamp.online',
     siteName: 'DevSamp',
     images: [
       {
@@ -101,8 +101,8 @@ export default function RootLayout({ children }) {
               "@context": "https://schema.org",
               "@type": "Organization",
               "name": "DevSamp",
-              "url": "https://devsamp.com",
-              "logo": "https://devsamp.com/icon-512.png",
+              "url": "https://www.devsamp.online",
+              "logo": "https://www.devsamp.online/icon-512.png",
               "sameAs": [
                 "https://x.com/devsamp1st",
                 "https://www.instagram.com/devsamp1st/",
