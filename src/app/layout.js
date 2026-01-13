@@ -25,6 +25,13 @@ export const metadata = {
     template: "%s | DevSamp Agency"
   },
   description: "DevSamp is a premium digital agency providing custom Web Development, App Solutions, and UI/UX Design. Transform your ideas into digital reality with expert developers.",
+  
+  // --- GOOGLE VERIFICATION CODE ---
+  verification: {
+    google: 'D6c5A0ciZ3q-98yon-nn2GAVcNvwoKhWvCeYV9GT2Mg',
+  },
+  // --------------------------------
+
   keywords: ["Web Development", "App Development", "UI/UX Design", "Next.js Agency", "React Developers", "Digital Agency India", "DevSamp", "Freelance Web Developer", "SEO Services", "Website Design"],
   authors: [{ name: "DevSamp Team", url: "https://www.devsamp.online" }],
   creator: "DevSamp",
@@ -35,7 +42,6 @@ export const metadata = {
     telephone: false,
   },
   manifest: "/manifest.json",
-  // Yahan humne icon-192.png ko main logo set kiya hai
   icons: {
     icon: '/icon-192.png',
     shortcut: '/icon-192.png',
@@ -52,7 +58,7 @@ export const metadata = {
     siteName: 'DevSamp Agency',
     images: [
       {
-        url: '/icon-512.png', // Social media ke liye badi image behtar hoti hai
+        url: '/icon-512.png',
         width: 512,
         height: 512,
         alt: 'DevSamp Agency Logo',
@@ -95,7 +101,7 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }) {
-  // Enhanced JSON-LD Schema for Google Rich Results
+  // Enhanced JSON-LD Schema
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -105,7 +111,7 @@ export default function RootLayout({ children }) {
         "url": "https://www.devsamp.online",
         "logo": {
           "@type": "ImageObject",
-          "url": "https://www.devsamp.online/icon-192.png", // Yahan bhi icon-192.png use kiya hai
+          "url": "https://www.devsamp.online/icon-192.png",
           "width": 192,
           "height": 192,
           "caption": "DevSamp Agency Logo"
@@ -138,7 +144,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning={true}>
       <head>
-        {/* JSON-LD Schema Injection */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
