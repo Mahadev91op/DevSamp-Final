@@ -33,23 +33,29 @@ const Team = () => {
   if (teamMembers.length === 0) return null;
 
   return (
-    <section id="team" className="py-24 bg-black text-white overflow-hidden">
-      <div className="container mx-auto px-6">
-        <div className="mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+    // CHANGE: py-12 for mobile (compact), py-24 for PC (original)
+    <section id="team" className="py-12 md:py-24 bg-black text-white overflow-hidden">
+      {/* CHANGE: px-4 for mobile, px-6 for PC */}
+      <div className="container mx-auto px-4 md:px-6">
+        {/* CHANGE: mb-6 for mobile, mb-12 for PC */}
+        <div className="mb-6 md:mb-12">
+          {/* CHANGE: Text size responsive */}
+          <h2 className="text-3xl md:text-5xl font-bold mb-2 md:mb-4">
             The <span className="text-blue-500">Squad</span>
           </h2>
-          <p className="text-gray-400">Meet the people who make the magic happen.</p>
+          <p className="text-sm md:text-base text-gray-400">Meet the people who make the magic happen.</p>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 h-[600px] md:h-[500px] w-full">
+        {/* CHANGE: h-[400px] for mobile (app-like feel), h-[500px] for PC logic preserved */}
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4 h-[400px] md:h-[500px] w-full">
           {teamMembers.map((member) => (
             <motion.div
               key={member._id}
               layout
               onClick={() => setActiveId(member._id)}
               onHoverStart={() => setActiveId(member._id)}
-              className={`relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-500 ease-in-out border border-white/10 ${
+              // CHANGE: rounded-2xl for mobile
+              className={`relative rounded-2xl md:rounded-3xl overflow-hidden cursor-pointer transition-all duration-500 ease-in-out border border-white/10 ${
                 activeId === member._id 
                   ? "flex-[3] grayscale-0" 
                   : "flex-[1] grayscale hover:grayscale-0"
@@ -71,36 +77,42 @@ const Team = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-black/90 via-black/60 to-transparent"
+                    // CHANGE: p-5 for mobile, p-8 for PC
+                    className="absolute bottom-0 left-0 w-full p-5 md:p-8 bg-gradient-to-t from-black/90 via-black/60 to-transparent"
                 >
                     <div className="flex justify-between items-end">
                         <div>
-                            <h3 className="text-3xl font-bold text-white mb-1">{member.name}</h3>
-                            <p className="text-blue-400 font-medium mb-3">{member.role}</p>
-                            <p className="text-gray-300 text-sm max-w-xs">{member.desc}</p>
+                            {/* CHANGE: Text sizes optimized for mobile */}
+                            <h3 className="text-xl md:text-3xl font-bold text-white mb-1">{member.name}</h3>
+                            <p className="text-blue-400 text-xs md:text-base font-medium mb-1 md:mb-3">{member.role}</p>
+                            {/* CHANGE: line-clamp-2 ensures desc doesn't overflow on small phone screens */}
+                            <p className="text-gray-300 text-[10px] md:text-sm max-w-xs line-clamp-2 md:line-clamp-none">{member.desc}</p>
                         </div>
-                        <div className="flex gap-3">
-                            <a href="https://www.freelancer.in/u/DevSamp" target="_blank" className="p-2 rounded-full bg-white/20 hover:bg-white text-white hover:text-black transition-all">
-                                <Bird size={20} />
+                        
+                        {/* CHANGE: Gap and padding adjustment for icons on mobile */}
+                        <div className="flex flex-col md:flex-row gap-2 md:gap-3">
+                            <a href="https://www.freelancer.in/u/DevSamp" target="_blank" className="p-1.5 md:p-2 rounded-full bg-white/20 hover:bg-white text-white hover:text-black transition-all">
+                                <Bird size={16} className="md:w-5 md:h-5" />
                             </a>
-                            <a href="https://www.youtube.com/@DevSamp1st" target="_blank" className="p-2 rounded-full bg-white/20 hover:bg-white text-white hover:text-black transition-all">
-                                <Youtube size={20} />
+                            <a href="https://www.youtube.com/@DevSamp1st" target="_blank" className="p-1.5 md:p-2 rounded-full bg-white/20 hover:bg-white text-white hover:text-black transition-all">
+                                <Youtube size={16} className="md:w-5 md:h-5" />
                             </a>
-                            <a href="https://x.com/devsamp1st" target="_blank" className="p-2 rounded-full bg-white/20 hover:bg-white text-white hover:text-black transition-all">
-                                <XIcon size={20} />
+                            <a href="https://x.com/devsamp1st" target="_blank" className="p-1.5 md:p-2 rounded-full bg-white/20 hover:bg-white text-white hover:text-black transition-all">
+                                <XIcon size={16} className="md:w-5 md:h-5" />
                             </a>
                         </div>
                     </div>
                 </motion.div>
               ) : (
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 md:rotate-[-90deg] whitespace-nowrap">
-                    <p className="text-xl font-bold tracking-widest text-white/80 uppercase">{member.name}</p>
+                // CHANGE: Layout for collapsed state. Mobile: Centered horizontal text. PC: Rotated vertical text.
+                <div className="absolute top-1/2 left-4 -translate-y-1/2 md:top-auto md:left-1/2 md:bottom-8 md:translate-y-0 md:-translate-x-1/2 md:rotate-[-90deg] whitespace-nowrap">
+                    <p className="text-sm md:text-xl font-bold tracking-widest text-white/80 uppercase">{member.name}</p>
                 </div>
               )}
 
               {activeId !== member._id && (
-                <div className="absolute top-6 right-6 md:top-auto md:bottom-6 md:left-1/2 md:-translate-x-1/2 p-2 rounded-full bg-white/10 backdrop-blur-md">
-                    <Plus className="text-white" size={20} />
+                <div className="absolute top-1/2 right-4 -translate-y-1/2 md:top-auto md:right-auto md:bottom-6 md:left-1/2 md:-translate-x-1/2 p-1.5 md:p-2 rounded-full bg-white/10 backdrop-blur-md">
+                    <Plus className="text-white" size={16} />
                 </div>
               )}
             </motion.div>

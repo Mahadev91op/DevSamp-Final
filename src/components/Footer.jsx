@@ -6,7 +6,7 @@ import {
   Youtube, 
   Instagram, 
   ArrowUpRight,
-  Bird // Freelancer Icon
+  Bird 
 } from "lucide-react";
 
 // X (Twitter) Icon
@@ -17,7 +17,6 @@ const XIcon = ({ size = 20, className }) => (
 );
 
 const Footer = () => {
-  // --- PHONE HANDLER ---
   const handlePhoneClick = () => {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const phoneNumber = "919330680642";
@@ -30,14 +29,11 @@ const Footer = () => {
     }
   };
 
-  // --- EMAIL LINK GENERATOR ---
   const emailAddress = "devsamp1st@gmail.com";
   const subject = "Project Inquiry - DevSamp";
   const body = "Hello Team,\n\nI am interested in your services.\n\nName:\nProject Details:\n\nThanks.";
-
   const mailtoLink = `mailto:${emailAddress}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-  // --- ANIMATION VARIANTS ---
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -52,10 +48,11 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-black text-white pt-24 overflow-hidden relative border-t border-white/10">
+    // Mobile: pb-20 (Space for absolute text), PC: pb-0 (Normal flow)
+    <footer className="bg-black text-white pt-12 pb-20 md:pt-24 md:pb-0 overflow-hidden relative border-t border-white/10">
       
       <motion.div 
-        className="container mx-auto px-6 relative z-10"
+        className="container mx-auto px-4 md:px-6 relative z-10"
         variants={containerVariants}
         initial="hidden"
         whileInView="show"
@@ -65,51 +62,51 @@ const Footer = () => {
         {/* --- TOP CTA --- */}
         <motion.div 
             variants={itemVariants}
-            className="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 pb-12 border-b border-white/10"
+            className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 pb-6 md:mb-24 md:pb-12 border-b border-white/10"
         >
             <div className="max-w-2xl">
-                <h2 className="text-4xl md:text-7xl font-bold leading-tight mb-6">
+                <h2 className="text-3xl md:text-7xl font-bold leading-tight mb-4 md:mb-6">
                     Have an idea? <br />
                     <span className="text-gray-500">Let's build it.</span>
                 </h2>
             </div>
             
-            <Link href="/#contact">
+            <Link href="/#contact" className="w-full md:w-auto">
                 <motion.button 
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="mt-8 md:mt-0 px-10 py-5 rounded-full bg-white text-black font-bold text-xl flex items-center gap-3 hover:bg-blue-500 hover:text-white transition-all duration-300 group"
+                    className="mt-6 md:mt-0 w-full md:w-auto px-6 py-3 md:px-10 md:py-5 rounded-full bg-white text-black font-bold text-base md:text-xl flex justify-center md:justify-start items-center gap-2 md:gap-3 hover:bg-blue-500 hover:text-white transition-all duration-300 group"
                 >
                     Start Project
-                    <ArrowUpRight className="group-hover:rotate-45 transition-transform duration-300" />
+                    <ArrowUpRight className="group-hover:rotate-45 transition-transform duration-300 w-5 h-5 md:w-6 md:h-6" />
                 </motion.button>
             </Link>
         </motion.div>
 
         {/* --- LINKS GRID --- */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-24">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-8 md:gap-12 mb-12 md:mb-24">
             
             {/* 1. Address */}
-            <motion.div variants={itemVariants} className="md:col-span-4">
-                <Link href="/" className="text-3xl font-bold tracking-tighter text-white mb-6 block">
+            <motion.div variants={itemVariants} className="col-span-2 md:col-span-4">
+                <Link href="/" className="text-2xl md:text-3xl font-bold tracking-tighter text-white mb-3 md:mb-6 block">
                     DEV<span className="text-blue-500">SAMP</span>
                 </Link>
-                <p className="text-gray-400 text-lg leading-relaxed mb-6">
+                <p className="text-gray-400 text-sm md:text-lg leading-relaxed mb-4 md:mb-6 max-w-sm md:max-w-none">
                     A digital product agency crafting world-class websites and apps. 
                     Based in India, working globally.
                 </p>
-                <div className="flex gap-4">
+                <div className="flex gap-3 md:gap-4">
                     {[
-                        { href: "https://www.freelancer.in/u/DevSamp", icon: <Bird size={20} />, color: "hover:bg-blue-600" },
-                        { href: "https://www.youtube.com/@DevSamp1st", icon: <Youtube size={20} />, color: "hover:bg-red-600" },
-                        { href: "https://x.com/devsamp1st", icon: <XIcon size={20} />, color: "hover:bg-white hover:text-black" },
-                        { href: "https://www.instagram.com/devsamp1st/", icon: <Instagram size={20} />, color: "hover:bg-pink-600" }
+                        { href: "https://www.freelancer.in/u/DevSamp", icon: <Bird size={18} className="md:w-5 md:h-5" />, color: "hover:bg-blue-600" },
+                        { href: "https://www.youtube.com/@DevSamp1st", icon: <Youtube size={18} className="md:w-5 md:h-5" />, color: "hover:bg-red-600" },
+                        { href: "https://x.com/devsamp1st", icon: <XIcon size={18} className="md:w-5 md:h-5" />, color: "hover:bg-white hover:text-black" },
+                        { href: "https://www.instagram.com/devsamp1st/", icon: <Instagram size={18} className="md:w-5 md:h-5" />, color: "hover:bg-pink-600" }
                     ].map((social, index) => (
                         <motion.a 
                             key={index}
                             href={social.href} 
                             target="_blank" 
-                            className={`p-3 rounded-full bg-white/5 ${social.color} transition-colors`}
+                            className={`p-2.5 md:p-3 rounded-full bg-white/5 ${social.color} transition-colors`}
                             whileHover={{ y: -5 }}
                         >
                             {social.icon}
@@ -119,14 +116,14 @@ const Footer = () => {
             </motion.div>
 
             {/* 2. Company Links */}
-            <motion.div variants={itemVariants} className="md:col-span-2 md:col-start-6">
-                <h4 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6">Company</h4>
-                <div className="flex flex-col gap-4">
+            <motion.div variants={itemVariants} className="col-span-1 md:col-span-2 md:col-start-6">
+                <h4 className="text-xs md:text-sm font-bold uppercase tracking-widest text-gray-500 mb-4 md:mb-6">Company</h4>
+                <div className="flex flex-col gap-3 md:gap-4">
                     {["About", "Our Team", "Process", "Contact"].map((item) => (
                         <Link 
                             key={item} 
                             href={`/#${item.toLowerCase().replace(" ", "")}`} 
-                            className="block w-fit text-gray-300 hover:text-white transition-colors"
+                            className="block w-fit text-sm md:text-base text-gray-300 hover:text-white transition-colors"
                         >
                             <motion.span whileHover={{ x: 5 }} className="inline-block">
                                 {item}
@@ -137,9 +134,9 @@ const Footer = () => {
             </motion.div>
 
             {/* 3. Explore Links */}
-            <motion.div variants={itemVariants} className="md:col-span-2">
-                <h4 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6">Explore</h4>
-                <div className="flex flex-col gap-4">
+            <motion.div variants={itemVariants} className="col-span-1 md:col-span-2">
+                <h4 className="text-xs md:text-sm font-bold uppercase tracking-widest text-gray-500 mb-4 md:mb-6">Explore</h4>
+                <div className="flex flex-col gap-3 md:gap-4">
                     {[
                         { name: "Services", href: "/#services" },
                         { name: "Portfolio", href: "/projects" },
@@ -149,7 +146,7 @@ const Footer = () => {
                         <Link 
                             key={item.name} 
                             href={item.href} 
-                            className="block w-fit text-gray-300 hover:text-white transition-colors"
+                            className="block w-fit text-sm md:text-base text-gray-300 hover:text-white transition-colors"
                         >
                             <motion.span whileHover={{ x: 5 }} className="inline-block">
                                 {item.name}
@@ -160,11 +157,11 @@ const Footer = () => {
             </motion.div>
 
              {/* 4. Contact Info */}
-             <motion.div variants={itemVariants} className="md:col-span-3">
-                <h4 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6">Contact</h4>
+             <motion.div variants={itemVariants} className="col-span-2 md:col-span-3">
+                <h4 className="text-xs md:text-sm font-bold uppercase tracking-widest text-gray-500 mb-4 md:mb-6">Contact</h4>
                 <a 
                     href={mailtoLink}
-                    className="block w-fit text-xl font-medium text-white mb-2 hover:text-blue-400 transition-colors"
+                    className="block w-fit text-lg md:text-xl font-medium text-white mb-2 hover:text-blue-400 transition-colors"
                 >
                     <motion.span whileHover={{ x: 5 }} className="inline-block">
                         devsamp1st@gmail.com
@@ -172,7 +169,7 @@ const Footer = () => {
                 </a>
                 <p 
                     onClick={handlePhoneClick}
-                    className="w-fit text-xl font-medium text-white cursor-pointer hover:text-purple-400 transition-colors"
+                    className="w-fit text-lg md:text-xl font-medium text-white cursor-pointer hover:text-purple-400 transition-colors"
                 >
                     <motion.span whileHover={{ x: 5 }} className="inline-block">
                         +91 9330680642
@@ -181,13 +178,13 @@ const Footer = () => {
             </motion.div>
         </div>
 
-        {/* --- BOTTOM BAR (UPDATED LINKS) --- */}
+        {/* --- BOTTOM BAR --- */}
         <motion.div 
             variants={itemVariants}
-            className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 mb-8 gap-4 md:gap-0"
+            className="border-t border-white/10 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center text-xs md:text-sm text-gray-500 mb-6 md:mb-8 gap-3 md:gap-0"
         >
             <p>&copy; {new Date().getFullYear()} DevSamp Agency.</p>
-            <div className="flex gap-8">
+            <div className="flex gap-6 md:gap-8">
                 <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
                 <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
                 <Link href="/sitemap" className="hover:text-white transition-colors">Sitemap</Link>
@@ -197,13 +194,14 @@ const Footer = () => {
       </motion.div>
 
       {/* BACKGROUND TEXT */}
-      <div className="w-full flex justify-center overflow-hidden pointer-events-none">
+      {/* FIX: Mobile = Absolute Bottom, PC = Static (Normal Flow like original) */}
+      <div className="w-full flex justify-center overflow-hidden pointer-events-none absolute bottom-0 md:static md:bottom-auto z-0">
         <motion.h1 
             initial={{ y: 50, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="text-[18vw] font-bold text-white/5 leading-none select-none"
+            className="text-[15vw] md:text-[18vw] font-bold text-white/5 leading-none select-none"
         >
             DEVSAMP
         </motion.h1>

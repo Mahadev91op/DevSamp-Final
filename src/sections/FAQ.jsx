@@ -36,30 +36,35 @@ const FAQ = () => {
   const [activeIndex, setActiveIndex] = useState(0); // Pehla wala khula rakhenge
 
   return (
-    <section className="py-24 bg-black text-white relative overflow-hidden">
+    // CHANGE: py-12 for mobile, py-24 for PC
+    <section className="py-12 md:py-24 bg-black text-white relative overflow-hidden">
       
       {/* Background Ambience */}
       <div className="absolute right-0 top-0 w-[600px] h-[600px] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <div className="container mx-auto px-6 max-w-5xl relative z-10">
+      {/* CHANGE: px-4 for mobile, px-6 for PC */}
+      <div className="container mx-auto px-4 md:px-6 max-w-5xl relative z-10">
         
         {/* Header */}
-        <div className="mb-16 md:text-center">
-          <h2 className="text-4xl md:text-6xl font-bold mb-4">
+        {/* CHANGE: mb-8 for mobile, mb-16 for PC */}
+        <div className="mb-8 md:mb-16 md:text-center">
+          {/* CHANGE: Text sizes for mobile */}
+          <h2 className="text-3xl md:text-6xl font-bold mb-2 md:mb-4">
             Common <span className="text-blue-500">Queries</span>
           </h2>
-          <p className="text-gray-400 text-lg">
+          <p className="text-gray-400 text-sm md:text-lg">
             Got questions? We've got answers.
           </p>
         </div>
 
         {/* --- FAQ GRID --- */}
-        <div className="grid grid-cols-1 gap-6">
+        {/* CHANGE: gap-3 for mobile (compact list), gap-6 for PC */}
+        <div className="grid grid-cols-1 gap-3 md:gap-6">
           {faqs.map((faq, index) => (
             <div
               key={index}
               onClick={() => setActiveIndex(activeIndex === index ? null : index)}
-              className={`group relative rounded-2xl border transition-all duration-500 cursor-pointer overflow-hidden ${
+              className={`group relative rounded-xl md:rounded-2xl border transition-all duration-500 cursor-pointer overflow-hidden ${
                 activeIndex === index 
                   ? "bg-white/10 border-blue-500/50" 
                   : "bg-white/5 border-white/10 hover:border-white/30"
@@ -67,29 +72,33 @@ const FAQ = () => {
             >
               
               {/* Question Header */}
-              <div className="relative z-10 p-6 md:p-8 flex items-center gap-6">
+              {/* CHANGE: p-4 for mobile, p-8 for PC. gap-3 for mobile, gap-6 for PC */}
+              <div className="relative z-10 p-4 md:p-8 flex items-center gap-3 md:gap-6">
                 
                 {/* Numbering (01, 02) */}
-                <span className={`text-2xl font-bold font-mono transition-colors duration-300 ${
+                {/* CHANGE: text-lg for mobile, text-2xl for PC */}
+                <span className={`text-lg md:text-2xl font-bold font-mono transition-colors duration-300 ${
                     activeIndex === index ? "text-blue-400" : "text-gray-600 group-hover:text-gray-400"
                 }`}>
                     {faq.id}
                 </span>
 
                 {/* Question Text */}
-                <h3 className={`flex-1 text-xl md:text-2xl font-semibold transition-colors duration-300 ${
+                {/* CHANGE: text-sm for mobile, text-2xl for PC */}
+                <h3 className={`flex-1 text-sm md:text-2xl font-semibold transition-colors duration-300 ${
                     activeIndex === index ? "text-white" : "text-gray-300 group-hover:text-white"
                 }`}>
                   {faq.question}
                 </h3>
 
                 {/* Icon Button */}
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300 ${
+                {/* CHANGE: Smaller icon box on mobile (w-8 h-8) */}
+                <div className={`flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full border transition-all duration-300 ${
                     activeIndex === index 
                         ? "bg-blue-600 border-blue-600 rotate-180" 
                         : "border-white/20 group-hover:border-white"
                 }`}>
-                    {activeIndex === index ? <Minus size={20} /> : <Plus size={20} />}
+                    {activeIndex === index ? <Minus size={16} className="md:w-5 md:h-5" /> : <Plus size={16} className="md:w-5 md:h-5" />}
                 </div>
               </div>
 
@@ -100,9 +109,14 @@ const FAQ = () => {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }} // <-- THIS FIXES THE LAG
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   >
-                    <div className="px-6 md:px-8 pb-8 pt-0 pl-[5.5rem] text-gray-400 text-lg leading-relaxed">
+                    {/* CHANGE: 
+                        - px-4 pb-4 for mobile 
+                        - pl-4 for mobile (removes deep indentation), pl-[5.5rem] for PC (keeps indentation)
+                        - text-sm for mobile
+                    */}
+                    <div className="px-4 pb-4 md:px-8 md:pb-8 pt-0 pl-4 md:pl-[5.5rem] text-gray-400 text-xs md:text-lg leading-relaxed">
                       {faq.answer}
                     </div>
                   </motion.div>
