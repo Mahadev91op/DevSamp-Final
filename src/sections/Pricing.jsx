@@ -1,37 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Check, X, Zap } from "lucide-react";
 
-const Pricing = () => {
-  const [plans, setPlans] = useState([]);
+const Pricing = ({ initialPlans = [] }) => {
+  const [plans] = useState(initialPlans); // No fetch
   const [billing, setBilling] = useState("monthly");
-
-  useEffect(() => {
-    const fetchPricing = async () => {
-      try {
-        const res = await fetch("/api/pricing");
-        const data = await res.json();
-        setPlans(data.pricing || []);
-      } catch (error) {
-        console.error("Failed to fetch pricing", error);
-      }
-    };
-    fetchPricing();
-  }, []);
 
   return (
     <section id="pricing" className="py-12 md:py-24 bg-black text-white relative overflow-hidden">
-      
-      {/* Background Glows */}
       <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-purple-900/10 rounded-full blur-[120px] pointer-events-none"></div>
 
       <div className="container mx-auto px-4 md:px-6 relative z-10">
-        
-        {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-8 md:mb-16">
           <h2 className="text-3xl md:text-5xl font-bold mb-4 md:mb-6">
             Simple, Transparent <span className="text-blue-500">Pricing</span>
@@ -40,7 +23,6 @@ const Pricing = () => {
             Choose the perfect plan for your business needs. No hidden fees.
           </p>
 
-          {/* Toggle Switch */}
           <div className="flex items-center justify-center gap-4">
             <span className={`text-sm font-bold ${billing === "monthly" ? "text-white" : "text-gray-500"}`}>
                 Monthly
@@ -63,8 +45,6 @@ const Pricing = () => {
           </div>
         </div>
 
-        {/* Cards Grid / Carousel */}
-        {/* FIX: Added 'pt-6' here so the 'Most Popular' badge doesn't get cut off on mobile */}
         <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory pt-6 pb-6 md:pb-0 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 items-stretch md:items-start">
           {plans.map((plan, index) => (
             <motion.div
@@ -125,11 +105,9 @@ const Pricing = () => {
                     </div>
                 ))}
               </div>
-
             </motion.div>
           ))}
         </div>
-
       </div>
     </section>
   );

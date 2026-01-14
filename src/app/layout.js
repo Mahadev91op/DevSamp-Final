@@ -3,37 +3,41 @@ import "./globals.css";
 
 // Components Imports
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import CustomCursor from "@/components/CustomCursor";
 import Noise from "@/components/Noise";
 import ScrollToTop from "@/components/ScrollToTop";
-
-// New Features Imports
 import Preloader from "@/components/Preloader";
-import ProgressBar from "@/components/ProgressBar";
-import WhatsAppBtn from "@/components/WhatsAppBtn";
-import Chatbot from "@/components/Chatbot";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
+// NEW: Import the ClientFeatures component
+// (Make sure you have created this file in src/components/ClientFeatures.jsx)
+import ClientFeatures from "@/components/ClientFeatures"; 
 
-// --- IMPROVED SEO METADATA ---
+const inter = Inter({ 
+  subsets: ["latin"], 
+  variable: "--font-inter",
+  display: 'swap' 
+});
+
+const outfit = Outfit({ 
+  subsets: ["latin"], 
+  variable: "--font-outfit",
+  display: 'swap' 
+});
+
+// --- SEO METADATA ---
 export const metadata = {
-  metadataBase: new URL('https://www.devsamp.online'),
+  metadataBase: new URL('https://devsamp.online'),
   title: {
     default: "DevSamp | Top Web Development & UI/UX Design Agency",
     template: "%s | DevSamp Agency"
   },
   description: "DevSamp is a premium digital agency providing custom Web Development, App Solutions, and UI/UX Design. Transform your ideas into digital reality with expert developers.",
   
-  // --- GOOGLE VERIFICATION CODE ---
   verification: {
     google: 'D6c5A0ciZ3q-98yon-nn2GAVcNvwoKhWvCeYV9GT2Mg',
   },
-  // --------------------------------
 
   keywords: ["Web Development", "App Development", "UI/UX Design", "Next.js Agency", "React Developers", "Digital Agency India", "DevSamp", "Freelance Web Developer", "SEO Services", "Website Design"],
-  authors: [{ name: "DevSamp Team", url: "https://www.devsamp.online" }],
+  authors: [{ name: "DevSamp Team", url: "https://devsamp.online/" }],
   creator: "DevSamp",
   publisher: "DevSamp Agency",
   formatDetection: {
@@ -46,15 +50,11 @@ export const metadata = {
     icon: '/icon-192.png',
     shortcut: '/icon-192.png',
     apple: '/icon-192.png',
-    other: {
-      rel: 'apple-touch-icon-precomposed',
-      url: '/icon-192.png',
-    },
   },
   openGraph: {
     title: "DevSamp | Modern Digital Agency",
     description: "Transforming ideas into digital reality. Expert Web & App Development services.",
-    url: 'https://www.devsamp.online',
+    url: 'https://devsamp.online/',
     siteName: 'DevSamp Agency',
     images: [
       {
@@ -77,13 +77,6 @@ export const metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
   },
   appleWebApp: {
     capable: true,
@@ -101,22 +94,21 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }) {
-  // Enhanced JSON-LD Schema
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "Organization",
         "name": "DevSamp",
-        "url": "https://www.devsamp.online",
+        "url": "https://devsamp.online/",
         "logo": {
           "@type": "ImageObject",
-          "url": "https://www.devsamp.online/icon-192.png",
+          "url": "https://devsamp.online/icon-192.png",
           "width": 192,
           "height": 192,
           "caption": "DevSamp Agency Logo"
         },
-        "image": "https://www.devsamp.online/icon-512.png",
+        "image": "https://devsamp.online/icon-512.png",
         "sameAs": [
           "https://x.com/devsamp1st",
           "https://www.instagram.com/devsamp1st/",
@@ -136,7 +128,7 @@ export default function RootLayout({ children }) {
         "@type": "WebSite",
         "name": "DevSamp",
         "alternateName": ["DevSamp Agency", "DevSamp Web Solutions"],
-        "url": "https://www.devsamp.online"
+        "url": "https://devsamp.online/"
       }
     ]
   };
@@ -154,10 +146,10 @@ export default function RootLayout({ children }) {
         suppressHydrationWarning={true}
       >
         <Preloader />
-        <ProgressBar />
-        <WhatsAppBtn />
-        <Chatbot />
-        <CustomCursor />
+        
+        {/* Client Features (Cursor, ProgressBar, WhatsApp, Chatbot) loaded here */}
+        <ClientFeatures />
+        
         <Noise />
         <ScrollToTop />
         <Navbar />

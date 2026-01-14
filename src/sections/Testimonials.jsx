@@ -5,58 +5,40 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Quote, Star, Plus, X, Loader2, Send } from "lucide-react";
 
-const Testimonials = () => {
-  const [reviews, setReviews] = useState([]);
+// Props accepted
+const Testimonials = ({ initialReviews = [] }) => {
+  const [reviews, setReviews] = useState(initialReviews); // Initial data from props
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", role: "", rating: 5, text: "" });
 
-  // Auto-Scroll Refs (For Both PC & Mobile)
   const scrollRef = useRef(null);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Fetch Reviews
-  const fetchReviews = async () => {
-    try {
-      const res = await fetch("/api/reviews");
-      const data = await res.json();
-      setReviews(data.reviews || []);
-    } catch (error) {
-      console.error("Error fetching reviews", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchReviews();
-  }, []);
-
-  // --- UNIFIED AUTO-SCROLL LOGIC (PC + MOBILE) ---
+  // Auto-scroll logic (Same as before)
   useEffect(() => {
     const scrollContainer = scrollRef.current;
     if (!scrollContainer) return;
 
     let animationFrameId;
-    
     const scroll = () => {
       if (!isPaused && scrollContainer) {
-        // Infinite Loop Logic
         if (scrollContainer.scrollLeft >= scrollContainer.scrollWidth / 2) {
             scrollContainer.scrollLeft = 0;
         } else {
-            scrollContainer.scrollLeft += 0.8; // Speed controlled here (0.8 is smooth)
+            scrollContainer.scrollLeft += 0.8; 
         }
       }
       animationFrameId = requestAnimationFrame(scroll);
     };
-
     animationFrameId = requestAnimationFrame(scroll);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [isPaused, reviews]); // Dependency on reviews allows recalculation when loaded
+  }, [isPaused, reviews]);
 
-  // Submit Handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    // POST request still happens client-side (interaction)
     const res = await fetch("/api/reviews", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -66,21 +48,18 @@ const Testimonials = () => {
     if (res.ok) {
         setForm({ name: "", role: "", rating: 5, text: "" });
         setIsModalOpen(false);
-        fetchReviews();
-        alert("Thanks for your feedback!");
+        // Refresh karne ke liye hum manually fetch kar sakte hain agar naya review turant dikhana hai
+        // ya bas alert dikha dein. Simple rakhte hain:
+        alert("Thanks for your feedback! It will appear after approval.");
     }
     setLoading(false);
   };
 
-  // Content Duplicate for Infinite Loop Effect
   const displayReviews = reviews.length < 5 ? [...reviews, ...reviews, ...reviews] : reviews;
-  // Double duplication ensures smooth loop without visual jumps
   const loopedReviews = [...displayReviews, ...displayReviews];
 
   return (
     <section className="py-12 md:py-24 bg-black text-white relative overflow-hidden">
-      
-      {/* Background Decor */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[150px] md:w-[600px] md:h-[300px] bg-blue-500/10 rounded-full blur-[80px] md:blur-[120px] pointer-events-none"></div>
 
       <div className="container mx-auto px-4 md:px-6 mb-8 md:mb-12 text-center relative z-10">
@@ -102,12 +81,9 @@ const Testimonials = () => {
         </button>
       </div>
 
-      {/* --- UNIFIED CAROUSEL VIEW (Mobile + PC) --- */}
       <div 
         ref={scrollRef}
-        // Unified container styles
         className="flex overflow-x-auto gap-4 md:gap-8 px-4 md:px-0 pb-6 -mx-4 md:mx-0 scrollbar-hide items-stretch w-full"
-        // Pause on interactions
         onTouchStart={() => setIsPaused(true)}
         onTouchEnd={() => setIsPaused(false)}
         onMouseEnter={() => setIsPaused(true)}
@@ -117,20 +93,22 @@ const Testimonials = () => {
             loopedReviews.map((item, index) => (
                 <div
                 key={`${item._id}-${index}`}
-                // CHANGE: 
-                // Mobile: w-[85vw] (Full width focus)
-                // PC: w-[450px] (Standard card size)
                 className="flex-shrink-0 w-[85vw] md:w-[450px] p-6 md:p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm flex flex-col justify-between hover:bg-white/10 transition-colors"
                 >
                 <div>
                     <Quote className="text-blue-500 mb-3 md:mb-4 opacity-50" size={24} />
-                    {/* Responsive text size */}
                     <p className="text-sm md:text-lg text-gray-300 leading-relaxed mb-4 md:mb-6 line-clamp-4 md:line-clamp-none">"{item.text}"</p>
                 </div>
                 
                 <div className="flex items-center gap-3 md:gap-4">
                     <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border border-white/20 flex-shrink-0">
-                    <Image src={item.image || "https://randomuser.me/api/portraits/lego/1.jpg"} alt={item.name} fill className="object-cover" />
+                    <Image 
+                        src={item.image || "https://randomuser.me/api/portraits/lego/1.jpg"} 
+                        alt={item.name} 
+                        fill 
+                        sizes="50px"
+                        className="object-cover" 
+                    />
                     </div>
                     <div className="overflow-hidden">
                     <h4 className="font-bold text-white text-sm md:text-base truncate">{item.name}</h4>
@@ -149,7 +127,6 @@ const Testimonials = () => {
         )}
       </div>
 
-      {/* --- REVIEW MODAL --- */}
       <AnimatePresence>
         {isModalOpen && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
@@ -186,7 +163,6 @@ const Testimonials = () => {
             </div>
         )}
       </AnimatePresence>
-
     </section>
   );
 };
